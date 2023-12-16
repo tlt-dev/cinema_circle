@@ -1,0 +1,22 @@
+{% extends "Base.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="jumbotron jumbotron-fluid">
+      <div class="container-fluid">
+        {% include 'Navbar.html' %}
+      </div>
+      <center>
+        <div class="container">
+          <div class="hero-text">
+            <b><h1 class="landing-title">Unlimited movies and friends.</h1></b>
+            <p class="hero-p"></p>
+            <p>Ready to choose your movies ? Enter your informations to create your account.</p>
+            <a href="{% url 'register_page' %}">
+              <button class="btn btn-danger btn-lg">Get Started</button>
+            </a>
+          </div>
+        </div>
+      </center>
+    </div>
+{% endblock %}

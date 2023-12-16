@@ -1,0 +1,60 @@
+{% extends "Base.html" %}
+{% load app_tags %}
+{% load static %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="container-fluid">
+            {% include 'Navbar.html' %}
+        </div>
+    </div>
+    <div class="container-fluid movie-show-section">
+        <h5><b>Trending Now</b></h5>
+        <div class="row">
+            {% for movie in movies|slice:":8" %}
+            <div class="col-sm-3 mb-3 d-flex align-items-stretch">
+                <a href="{% url 'movie_details' movie|mongo_id %}">
+{#                <a href="{{ movie|mongo_id }}">#}
+                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="fluid img-thumbnail">
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="container-fluid movie-show-section">
+        <h5><b>Trending Now</b></h5>
+        <div class="row">
+            {% for movie in movies|slice:":8" %}
+            <div class="col-sm-3 mb-3 d-flex align-items-stretch">
+                <a href="">
+                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="fluid img-thumbnail">
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="container-fluid movie-show-section">
+        <h5><b>Trending Now</b></h5>
+        <div class="row">
+            {% for movie in movies|slice:":8" %}
+            <div class="col-sm-3 mb-3 d-flex align-items-stretch">
+                <a href="">
+                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="fluid img-thumbnail">
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="container-fluid movie-show-section">
+        <h5><b>Trending Now</b></h5>
+        <div class="row">
+            {% for movie in movies|slice:":8" %}
+            <div class="col-sm-3 mb-3 d-flex align-items-stretch">
+                <a href="">
+                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="fluid img-thumbnail">
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
