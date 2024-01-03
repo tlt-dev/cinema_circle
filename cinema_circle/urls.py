@@ -25,5 +25,7 @@ urlpatterns = [
     path('cinema_circle/login', views.login_page, name='login_page'),
     path('cinema_circle/recommendations', views.login, name='login'),
     path('cinema_circle/recommendations', views.recommendations, name='recommendations'),
-    path('cinema_circle/movie_details/<str:id>', views.movie_details, name='movie_details')
+    path('cinema_circle/movies/<str:id>', views.movie_details, name='movie_details'),
+    path('cinema_cirlce/user/<str:id>', views.get_user, name='view_user_page'),
+    path('cinema_circle/movies/<str:id>/reviews/add', views.add_review, name='add_review')
 ]

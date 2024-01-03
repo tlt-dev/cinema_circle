@@ -7,47 +7,167 @@
             {% include 'Navbar.html' %}
         </div>
     </div>
-    <div class="container movie-details-header">
+    <div class="container movie-details-header" style="height: 90vh; max-height: 90vh">
         <div class="row">
             <div class="col-sm-5 text-center">
                 <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" height="600">
+                <div class="row text-center my-0 mt-5">
+                    <a href="{% url 'recommendations' %}" class="mx-auto">
+                        <button class="btn btn-danger btn-md text-center">Back to Recommendations</button>
+                    </a>
+                </div>
             </div>
             <div class="col-sm-7">
-                <h1 class="py-4"><b>{{ movie.title }}</b></h1>
-                <p>{{ movie.overview }}</p>
-                <h5 class="float-right"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(252, 180, 0, 1);transform: ;msFilter:;"><path d="M21.947 9.179a1.001 1.001 0 0 0-.868-.676l-5.701-.453-2.467-5.461a.998.998 0 0 0-1.822-.001L8.622 8.05l-5.701.453a1 1 0 0 0-.619 1.713l4.213 4.107-1.49 6.452a1 1 0 0 0 1.53 1.057L12 18.202l5.445 3.63a1.001 1.001 0 0 0 1.517-1.106l-1.829-6.4 4.536-4.082c.297-.268.406-.686.278-1.065z"></path></svg> {{ movie_details.vote_average }}</h5>
-                <hr>
-                <p><span class="text-muted">Date Released:</span> {{ movie.release_date }}</p>
-                <p><span class="text-muted">Duration:</span> {{ movie.runtime }} mins</p>
-                <p><span class="text-muted">Genre:</span> {% for genre in movie.genres %} {{ genre }}, {% endfor %}</p>
-                <hr>
-                <a href="https://www.youtube.com/watch?v=" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    <p><span class="text-light"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);transform: ;msFilter:;"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="m9 17 8-5-8-5z"></path></svg> Watch Trailer</span></p>
-                </a>
+                <ul class="nav nav-tabs" id="movie_tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-white bg-dark" id="details-tab" data-bs-toggle="tab"
+                                data-bs-target="#details"
+                                type="button" role="tab" aria-controls="details" aria-selected="true">Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-white bg-dark" id="reviews-tab" data-bs-toggle="tab"
+                                data-bs-target="#reviews"
+                                type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews
+                        </button>
+                    </li>
+                    <li class="ms-auto mb-1">
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#modal_add_review"> + Add review
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="movie_tabContent" style="overflow-y:auto; overflow-x: hidden">
+                    <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+                        <h1 class="py-4"><b>{{ movie.title }}</b></h1>
+                        <p>{{ movie.overview }}</p>
+                        <hr>
+                        <p><span class="text-muted">Date Released:</span> {{ movie.release_date }}</p>
+                        <p><span class="text-muted">Duration:</span> {{ movie.runtime }} mins</p>
+                        <p>
+                            <span class="text-muted">Genre:</span>
+                            {% for genre in movie.genres %} {{ genre }}
+                                , {% endfor %}
+                        </p>
+                        <hr>
+                        <div class="row">
+                            <div class="col-4">
+                                <button class="btn btn-outline-success text-white"><i class="bi bi-play-circle"
+                                                                                      style="font-size: 1.25rem"></i>
+                                    Mark as watched
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-danger text-white"><i class="bi bi-heart"
+                                                                                     style="font-size: 1.25rem"></i>
+                                    Like
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-info text-white"><i class="bi bi-heart-fill"
+                                                                                   style="font-size: 1.25rem"></i>
+                                    Dislike
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade h-100" id="reviews" role="tabpanel" aria-labelledby="reviews-tab"
+                         style="overflow-x: scroll; max-height: 80vh">
+                        <div class="row mt-3">
+                            <h4>
+                                One of the best of all time.
+                            </h4>
+                            <a href="{% url 'view_user_page' '657b4424e7be990ba7cdea2d' %}">Thomas LAURENT</a>
+                            <p class="mt-2">
+                                A masterclass in film making, is The Godfather a contender for the best film of all
+                                time? I'd argue the case that it is, this is the ultimate gangster movie.
+                            </p>
+                            <hr>
+                        </div>
+                        <div class="row mt-3">
+                            <h4>
+                                One of the best of all time.
+                            </h4>
+                            <a href="">Thomas LAURENT</a>
+                            <p class="mt-2">
+                                A masterclass in film making, is The Godfather a contender for the best film of all
+                                time? I'd argue the case that it is, this is the ultimate gangster movie.
+                            </p>
+                            <hr>
+                        </div>
+                        <div class="row mt-3">
+                            <h4>
+                                One of the best of all time.
+                            </h4>
+                            <a href="">Thomas LAURENT</a>
+                            <p class="mt-2">
+                                A masterclass in film making, is The Godfather a contender for the best film of all
+                                time? I'd argue the case that it is, this is the ultimate gangster movie.
+                            </p>
+                            <hr>
+                        </div>
+                        <div class="row mt-3">
+                            <h4>
+                                One of the best of all time.
+                            </h4>
+                            <a href="">Thomas LAURENT</a>
+                            <p class="mt-2">
+                                A masterclass in film making, is The Godfather a contender for the best film of all
+                                time? I'd argue the case that it is, this is the ultimate gangster movie.
+                            </p>
+                            <hr>
+                        </div>
+                        <div class="row mt-3">
+                            <h4>
+                                One of the best of all time.
+                            </h4>
+                            <a href="">Thomas LAURENT</a>
+                            <p class="mt-2">
+                                A masterclass in film making, is The Godfather a contender for the best film of all
+                                time? I'd argue the case that it is, this is the ultimate gangster movie.
+                            </p>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <!-- Modal -->
+                <div class="modal fade" id="modal_add_review" tabindex="-1" aria-labelledby="modalReview"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg shadow">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5>Add Review</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="POST" action="{% url 'add_review' '123' %}">
+                                    <div class="row justify-content-center">
+                                        <div class="col-10">
+                                            <input type="text" name="title" class="form-control bg-dark"
+                                                   placeholder="Title">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3 justify-content-center">
+                                        <div class="col-10">
+                                            <textarea name="title" rows="10" class="form-control bg-dark"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3 justify-content-center">
+                                        <div class="col-3">
+                                            <button type="submit" class="btn btn-success">Save review</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-        <br>
-
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <center>
-{#                        <iframe id="ytplayer" type="text/html" width="854" height="480" src="https://www.youtube.com/embed/{{ newDict.key }}?autoplay=1&origin=http://example.com" frameborder="0"></iframe>#}
-                    </center>
-                </div>
-            </div>
-            </div>
-        </div>
-
-        <center>
-            <a href="{% url 'recommendations' %}" style="margin: 100px;">
-                <button class="btn btn-danger btn-md text-center">Back to Recommendations</button>
-            </a>
-        </center>
     </div>
 {% endblock %}

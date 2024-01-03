@@ -8,53 +8,23 @@
             {% include 'Navbar.html' %}
         </div>
     </div>
-    <div class="container-fluid movie-show-section">
-        <h5><b>Trending Now</b></h5>
-        <div class="row">
-            {% for movie in movies|slice:":8" %}
-            <div class="col-sm-3 mb-3 d-flex align-items-stretch">
-                <a href="{% url 'movie_details' movie|mongo_id %}">
-{#                <a href="{{ movie|mongo_id }}">#}
-                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="fluid img-thumbnail">
-                </a>
-            </div>
-            {% endfor %}
+    <div class="container">
+        <div class="row mt-3 mx-2">
+            <h3>Films primés</h3>
         </div>
-    </div>
-    <div class="container-fluid movie-show-section">
-        <h5><b>Trending Now</b></h5>
-        <div class="row">
-            {% for movie in movies|slice:":8" %}
-            <div class="col-sm-3 mb-3 d-flex align-items-stretch">
-                <a href="">
-                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="fluid img-thumbnail">
+        <div class="row mt-3" style="height: 20%">
+            <div class="col-2">
+                <a href="{% url 'movie_details' '657b2245d448da2cface22ea' %}">
+                    <div class="card bg-transparent mb-3">
+                        <img src="https://image.tmdb.org/t/p/w400/3bhkrj58Vtu7enYsRolD1fZdja1.jpg"
+                             class="card-img-top rounded mx-auto" style="width:80%" alt="...">
+                        <div class="card-body bg-black mx-auto">
+                            <h5 class="card-title">The Godfather</h5>
+                            <p class="card-text"></p>
+                        </div>
+                    </div>
                 </a>
             </div>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="container-fluid movie-show-section">
-        <h5><b>Trending Now</b></h5>
-        <div class="row">
-            {% for movie in movies|slice:":8" %}
-            <div class="col-sm-3 mb-3 d-flex align-items-stretch">
-                <a href="">
-                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="fluid img-thumbnail">
-                </a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="container-fluid movie-show-section">
-        <h5><b>Trending Now</b></h5>
-        <div class="row">
-            {% for movie in movies|slice:":8" %}
-            <div class="col-sm-3 mb-3 d-flex align-items-stretch">
-                <a href="">
-                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" class="fluid img-thumbnail">
-                </a>
-            </div>
-            {% endfor %}
         </div>
     </div>
 {% endblock %}
