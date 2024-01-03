@@ -11,7 +11,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav mx-auto">
-                    
+                    <li class="nav-item">
+                        <a class="nav-link text" href="{% url 'recommendations' %}">Movies</a>
+                    </li>
                 </ul>
                 <div class="d-flex">
                     {% if user.is_authenticated %}
