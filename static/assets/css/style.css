@@ -411,12 +411,15 @@ accordion-item:first-of-type {
 }
 
 .card:hover {
-    transition-delay: 1s;
-    transition-duration: 3s;
-    width: 140%;
-    height: 120%;
+    /*width: 140%;*/
+    /*height: 120%;*/
+    /*transition: width 2s, height 4s;*/
+    transform: scale(1.2);
+    transition-delay: 0.2s;
+    transition-duration: 0.5s;
 
-    .card-body {
-        display: block;
-    }
+
+    /*.card-body {*/
+    /*    display: block;*/
+    /*}*/
 }

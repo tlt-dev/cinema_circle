@@ -21,12 +21,57 @@
                     <h5>{{ user.first_name }} {{ user.last_name }}</h5>
                     <p class="text-secondary">112 followers</p>
                 </div>
-                <div class="row mt-2 text-center">
-                    <div class="col">
-                        <button class="btn btn-outline-primary px-3 mx-auto"><i class="bi bi-person-plus"
-                                                                                style="font-size: 1.25rem"></i> Follow
-                        </button>
-                    </div>
+                <div class="row mt-2">
+                    <p><span class="text-muted">Email: </span>{{ user.email }}</p>
+                    <p><span class="text-muted">Password: </span>{{ user.password }}</p>
+                </div>
+                <div class="row mt-2">
+                    <h4>Genres Preferences</h4>
+                    <table>
+                        <tbody>
+                        <tr>
+                            <td>Western</td>
+                            <td>
+                                <form method="POST" action="">
+                                    <button class="btn btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Thriller</td>
+                            <td>
+                                <form method="POST" action="">
+                                    <button class="btn btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Horror</td>
+                            <td>
+                                <form method="POST" action="">
+                                    <button class="btn btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row mt-4">
+                    <form method="POST" action="">
+                        <div class="row">
+                            <div class="col-6">
+                                <select name="genre" class="form-control bg-dark text-white">
+                                    <option value="">- Select genre -</option>
+                                    {% for genre in genres %}
+                                        <option value="{{ genre }}">{{ genre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-primary">Add</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="col-8">
@@ -134,9 +179,11 @@
                                                   class="text-white"><u>{{ activity.movie.title }}</u></a></p>
 
                                     {% else %}
-                                        <p class="text-secondary"><span class="text-white">{{ user.first_name }} {{ user.last_name }}</span> has
+                                        <p class="text-secondary"><span
+                                                class="text-white">{{ user.first_name }} {{ user.last_name }}</span> has
                                             {{ activity.action }} <a
-                                                    href="{% url 'movie_details' activity.movie.id %}" class="text-white"><u>{{ activity.movie.title }}</u></a></p>
+                                                    href="{% url 'movie_details' activity.movie.id %}"
+                                                    class="text-white"><u>{{ activity.movie.title }}</u></a></p>
                                     {% endif %}
                                 </div>
                                 <div class="col-2">

@@ -27,5 +27,7 @@ urlpatterns = [
     path('cinema_circle/recommendations', views.recommendations, name='recommendations'),
     path('cinema_circle/movies/<str:id>', views.movie_details, name='movie_details'),
     path('cinema_cirlce/user/<str:id>', views.get_user, name='view_user_page'),
-    path('cinema_circle/movies/<str:id>/reviews/add', views.add_review, name='add_review')
+    path('cinema_circle/movies/<str:id>/reviews/add', views.add_review, name='add_review'),
+    path('cinema_circle/user/recommanded_users', views.get_recommanded_users, name='get_recommanded_users'),
+    path('cinema_circle/user/profile', views.get_user_profile, name='get_user_profile'),
 ]

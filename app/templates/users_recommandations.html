@@ -1,0 +1,30 @@
+{% extends "Base.html" %}
+{% load app_tags %}
+{% load static %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="container-fluid">
+            {% include 'Navbar.html' %}
+        </div>
+    </div>
+    <div class="container" style="overflow-y: scroll; max-height: 90vh">
+        {% for category in recommandations %}
+            <div class="row">
+                <div class="row mt-3 mx-2">
+                    <h3>{{ category.category_title }}</h3>
+                </div>
+                {% for user in category.user_list %}
+                    <div class="col-2 mt-2 text-center">
+                        <a href="{% url 'view_user_page' user|mongo_id %}">
+                            <img src="{% static 'assets/img/avatars/avatar_1.png' %}"
+                                 class="rounded-circle w-50  mx-auto"
+                                 alt="User profile avatar">
+                            <p class="text-white mt-2">{{ user.first_name }} {{ user.last_name }}</p>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

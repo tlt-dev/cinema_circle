@@ -45,9 +45,19 @@
                         <p><span class="text-muted">Date Released:</span> {{ movie.release_date }}</p>
                         <p><span class="text-muted">Duration:</span> {{ movie.runtime }} mins</p>
                         <p>
-                            <span class="text-muted">Genre:</span>
-                            {% for genre in movie.genres %} {{ genre }}
-                                , {% endfor %}
+                            <span class="text-muted">Genre: </span>
+                            {% for genre in movie.genre %}
+                                <span class="badge bg-dark p-2 mx-1">{{ genre }}</span>{% endfor %}
+                        </p>
+                        <p>
+                            <span class="text-muted">Directors: </span>
+                            {% for director in movie.directors %}
+                                <span class="badge bg-dark p-2 mx-1">{{ director.name }}</span>{% endfor %}
+                        </p>
+                        <p>
+                            <span class="text-muted">Cast: </span>
+                            {% for actor in movie.cast %}<span class="badge bg-dark p-2 mx-1">{{ actor.name }} <span
+                                    class="text-muted">({{ actor.character }})</span></span>{% endfor %}
                         </p>
                         <hr>
                         <div class="row">
@@ -74,61 +84,18 @@
 
                     <div class="tab-pane fade h-100" id="reviews" role="tabpanel" aria-labelledby="reviews-tab"
                          style="overflow-x: scroll; max-height: 80vh">
-                        <div class="row mt-3">
-                            <h4>
-                                One of the best of all time.
-                            </h4>
-                            <a href="{% url 'view_user_page' '657b4424e7be990ba7cdea2d' %}">Thomas LAURENT</a>
-                            <p class="mt-2">
-                                A masterclass in film making, is The Godfather a contender for the best film of all
-                                time? I'd argue the case that it is, this is the ultimate gangster movie.
-                            </p>
-                            <hr>
-                        </div>
-                        <div class="row mt-3">
-                            <h4>
-                                One of the best of all time.
-                            </h4>
-                            <a href="">Thomas LAURENT</a>
-                            <p class="mt-2">
-                                A masterclass in film making, is The Godfather a contender for the best film of all
-                                time? I'd argue the case that it is, this is the ultimate gangster movie.
-                            </p>
-                            <hr>
-                        </div>
-                        <div class="row mt-3">
-                            <h4>
-                                One of the best of all time.
-                            </h4>
-                            <a href="">Thomas LAURENT</a>
-                            <p class="mt-2">
-                                A masterclass in film making, is The Godfather a contender for the best film of all
-                                time? I'd argue the case that it is, this is the ultimate gangster movie.
-                            </p>
-                            <hr>
-                        </div>
-                        <div class="row mt-3">
-                            <h4>
-                                One of the best of all time.
-                            </h4>
-                            <a href="">Thomas LAURENT</a>
-                            <p class="mt-2">
-                                A masterclass in film making, is The Godfather a contender for the best film of all
-                                time? I'd argue the case that it is, this is the ultimate gangster movie.
-                            </p>
-                            <hr>
-                        </div>
-                        <div class="row mt-3">
-                            <h4>
-                                One of the best of all time.
-                            </h4>
-                            <a href="">Thomas LAURENT</a>
-                            <p class="mt-2">
-                                A masterclass in film making, is The Godfather a contender for the best film of all
-                                time? I'd argue the case that it is, this is the ultimate gangster movie.
-                            </p>
-                            <hr>
-                        </div>
+                        {% for comment in movie.comments %}
+                            <div class="row mt-3">
+                                <h4>
+                                    {{ comment.title }}
+                                </h4>
+                                <span class="text-muted">{{ comment.date }}</span>
+                                <p class="mt-2">
+                                    {{ comment.content }} - <a href="{% url 'view_user_page' comment.user.id %}">{{ comment.user.firstName }} {{ comment.user.lastName }}</a>
+                                </p>
+                                <hr>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
                 <br>
@@ -166,7 +133,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
