@@ -15,9 +15,9 @@
                     <h3>{{ category.category_title }}</h3>
                 </div>
                 {% for user in category.user_list %}
-                    <div class="col-2 mt-2 text-center">
+                    <div class="col-2 mt-2 text-center profile-card">
                         <a href="{% url 'view_user_page' user|mongo_id %}">
-                            <img src="{% static 'assets/img/avatars/avatar_1.png' %}"
+                            <img src="{% static 'assets/img/avatars/'|add:user.profile_pic_path %}"
                                  class="rounded-circle w-50  mx-auto"
                                  alt="User profile avatar">
                             <p class="text-white mt-2">{{ user.first_name }} {{ user.last_name }}</p>

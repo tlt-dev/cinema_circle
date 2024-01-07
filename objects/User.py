@@ -1,4 +1,4 @@
-from bson import ObjectId
+from bson import ObjectId, json_util
 
 from db_utlis import get_document_db
 
@@ -7,13 +7,36 @@ user_collection = db['user']
 
 
 class User:
-    def __init__(self, first_name=None, last_name=None, email=None, password=None, preferences=None, id=None):
-        self.id = None
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.password = password
-        self.preferences = preferences
+    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, preferences=None, profile_pic_path=None, id=None):
+        ''' Use user arg if user dict from db'''
+        if user is not None:
+            self.id = str(user['_id'])
+            self.first_name = user['first_name']
+            self.last_name = user['last_name']
+            self.email = user['email']
+            self.password = user['password']
+            self.preferences = user['preferences'] if 'preferences' in user else None
+            self.profile_pic_path = profile_pic_path
+        else:
+            self.id = id
+            self.first_name = first_name
+            self.last_name = last_name
+            self.email = email
+            self.password = password
+            self.preferences = preferences
+            self.profile_pic_path = profile_pic_path
+
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'password': self.password,
+            'preferences': self.preferences,
+            'profile_pic_path': self.profile_pic_path
+        }
 
     def user_exist(self):
         if user_collection.find_one({'email': self.email}) is not None:
@@ -27,7 +50,8 @@ class User:
                 'last_name': self.last_name,
                 'email': self.email,
                 'password': self.password,
-                'preferences': self.preferences
+                'preferences': self.preferences,
+                'profile_pic_path': self.profile_pic_path
             })
         except Exception as e:
             print("Error while creating user. Error : ", e)
@@ -63,7 +87,7 @@ class User:
     def get_by_email(self):
         if self.email is not None:
             try:
-                user = user_collection.find_one({'email': self.email})
+                user = User(user=user_collection.find_one({'email': self.email}))
             except Exception as e:
                 print("User does not exist. Error : ", e)
             else:
@@ -122,7 +146,7 @@ class User:
 
     def set_preferences(self, preferences):
         try:
-            user_collection.updateOne({'_id': ObjectId(self.id), 'preferences': preferences})
+            user_collection.update_one({'_id': ObjectId(self.id)}, {"$set": {'preferences': preferences}})
         except Exception as e:
             print("Error updating user. Error : ", e)
         else:

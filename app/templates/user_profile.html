@@ -12,7 +12,7 @@
         <div class="row mt-3" style="height: 85vh; max-height: 85vh">
             <div class="col-3">
                 <div class="row">
-                    {% with  'assets/img/avatars/'|add:user.avatar|add:'.png' as avatar_file_path %}
+                    {% with  'assets/img/avatars/'|add:user.profile_pic_path  as avatar_file_path %}
                         <img src="{% static avatar_file_path %}" class="rounded-circle w-50 mt-5 mx-auto"
                              alt="User profile avatar">
                     {% endwith %}
@@ -27,50 +27,52 @@
                 </div>
                 <div class="row mt-2">
                     <h4>Genres Preferences</h4>
-                    <table>
-                        <tbody>
-                        <tr>
-                            <td>Western</td>
-                            <td>
-                                <form method="POST" action="">
-                                    <button class="btn btn-outline-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Thriller</td>
-                            <td>
-                                <form method="POST" action="">
-                                    <button class="btn btn-outline-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Horror</td>
-                            <td>
-                                <form method="POST" action="">
-                                    <button class="btn btn-outline-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="row mt-4">
-                    <form method="POST" action="">
-                        <div class="row">
-                            <div class="col-6">
-                                <select name="genre" class="form-control bg-dark text-white">
-                                    <option value="">- Select genre -</option>
+                    <form method="POST" action="{% url 'update_preferences' %}">
+                        {% csrf_token %}
+                        <div class="row mt-2">
+                            <div class="col-7">
+                                <select class="form-control bg-dark" name="preference_1">
                                     {% for genre in genres %}
-                                        <option value="{{ genre }}">{{ genre }}</option>
+                                        {% if user.preferences.0 == genre %}
+                                            <option value="{{ genre }}" selected>{{ genre }}</option>
+                                        {% else %}
+                                            <option value="{{ genre }}">{{ genre }}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-2">
-                                <button class="btn btn-outline-primary">Add</button>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-7">
+                                <select class="form-control bg-dark" name="preference_2">
+                                    {% for genre in genres %}
+                                        {% if user.preferences.1 == genre %}
+                                            <option value="{{ genre }}" selected>{{ genre }}</option>
+                                        {% else %}
+                                            <option value="{{ genre }}">{{ genre }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
+                        <div class="row mt-2">
+                            <div class="col-7">
+                                <select class="form-control bg-dark" name="preference_3">
+                                    {% for genre in genres %}
+                                        {% if user.preferences.2 == genre %}
+                                            <option value="{{ genre }}" selected>{{ genre }}</option>
+                                        {% else %}
+                                            <option value="{{ genre }}">{{ genre }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    <div class="row mt-3">
+                        <div class="col-8">
+                            <button type="submit" class="btn btn-danger">Update preferences</button>
+                        </div>
+                    </div>
                     </form>
                 </div>
             </div>

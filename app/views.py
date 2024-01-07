@@ -1,39 +1,82 @@
 import datetime
+import random
 
 from bson import ObjectId
-from django.shortcuts import render
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth import login
+
 from db_utlis import get_document_db
+from objects.User import User
 from utils_functions import get_genres
+import pymongo
 
 import logging
 logger = logging.getLogger("mylogger")
+
+client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
+document_db = client['cinema_circle']
+movie_collection = document_db['movie']
+user_collection = document_db['user']
+
 
 
 def index(request):
     return render(request, 'index.html')
 
 
+@require_http_methods(['GET'])
 def register_page(request):
     genres = get_genres()
     return render(request, 'register.html', {'genres': genres})
+
+
+@require_http_methods(['POST'])
+def register(request):
+    user = User(
+        first_name=request.POST.get('first_name'),
+        last_name=request.POST.get('last_name'),
+        email=request.POST.get('email'),
+        password=request.POST.get('password'),
+        preferences=[request.POST.get('preference_1'), request.POST.get('preference_2'), request.POST.get('preference_3')],
+        profile_pic_path='avatar_' + str(random.randint(1,10)) + 'png'
+    )
+
+    if user.user_exist():
+        return HttpResponse('The email is already registered. Please try to login.')
+    else:
+        try:
+            user.create()
+        except Exception as e:
+            print(e)
+        else:
+            return redirect('recommendations')
 
 
 def login_page(request):
     return render(request, 'login.html')
 
 
-def login(request):
-    # TODO: Process authentification
+@require_http_methods(['POST'])
+def authenticate(request):
+    user = User(email=request.POST.get('email'), password=request.POST.get('password'))
+    if user.user_exist():
+        user = user.get_by_email()
+        if user is not None:
+            request.session['user'] = user.to_json()
+            request.session['user']['is_authenticated'] = True
+            return redirect('recommendations')
+    else:
+        return HttpResponse({'message': 'Invalid email or password'})
 
-     # return render(request, 'movie_recommandations.html')
-    return recommendations(request)
+
+def logout(request):
+    del request.session['user']
+    return redirect('index')
 
 
 def recommendations(request):
-    db, client = get_document_db()
-
-    movie_collection = db['movie']
-
     recommandations = [
         {
             "category_title": "Popular movies",
@@ -69,18 +112,11 @@ def recommendations(request):
 
 
 def movie_details(request, id):
-    db, client = get_document_db()
-
-    movie_collection = db['movie']
     movie = list(movie_collection.find({'_id': ObjectId(id)}))[0]
     return render(request, 'movie_details.html', {'movie': movie})
 
 
 def get_user(request, id):
-    db, client = get_document_db()
-
-    user_collection = db['user']
-    movie_collection = db['movie']
     user = user_collection.find_one({'_id': ObjectId(id)})
 
     if str(user['_id'])[-1].isdigit() and int(str(user['_id'])[-1]) in range(0, 10):
@@ -147,10 +183,6 @@ def add_review(request, id):
 
 
 def get_recommanded_users(request):
-    db, client = get_document_db()
-
-    user_collection = db['user']
-
     recommandations = [
         {
             "category_title": "Most actives",
@@ -176,19 +208,13 @@ def get_recommanded_users(request):
 
     return render(request, 'users_recommandations.html', {'recommandations': recommandations})
 
-def get_user_profile(request, id="657b4425e7be990ba7cdf109"):
+
+def get_user_profile(request):
     genres = get_genres()
 
-    db, client = get_document_db()
+    user_id = request.session.get('user')['id']
 
-    user_collection = db['user']
-    movie_collection = db['movie']
-    user = user_collection.find_one({'_id': ObjectId(id)})
-
-    if int(str(user['_id'])[-1]) in range(0, 10):
-        user['avatar'] = "avatar_" + str(user['_id'])[-1]
-    else:
-        user['avatar'] = "avatar_10"
+    user = user_collection.find_one({'_id': ObjectId(user_id)})
 
     user["watched_list"] = list(movie_collection.find().limit(15))
 
@@ -203,15 +229,15 @@ def get_user_profile(request, id="657b4425e7be990ba7cdf109"):
         if count == 10:
             break
 
-    genres = {}
+    genres_count = {}
     for movie in user["watched_list"]:
         for genre in movie["genre"]:
-            if genre not in genres.keys():
-                genres[genre] = 1
+            if genre not in genres_count.keys():
+                genres_count[genre] = 1
             else:
-                genres[genre] += 1
+                genres_count[genre] += 1
 
-    user["favorites_genres"] = dict(sorted(genres.items(), key=lambda x: x[1], reverse=True))
+    user["favorites_genres"] = dict(sorted(genres_count.items(), key=lambda x: x[1], reverse=True))
     user["last_activities"] = [
         {
             "action": "review",
@@ -242,3 +268,12 @@ def get_user_profile(request, id="657b4425e7be990ba7cdf109"):
     ]
 
     return render(request, 'user_profile.html', {"user": user, "genres": genres})
+
+@require_http_methods(["POST"])
+def update_preferences(request):
+    preferences = [request.POST.get('preference_1'), request.POST.get('preference_2'), request.POST.get('preference_3')]
+
+    user = User(id=request.session['user']['id'])
+    user.set_preferences(preferences)
+
+    return redirect('get_user_profile')

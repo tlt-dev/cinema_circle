@@ -23,12 +23,14 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('cinema_circle/', views.index, name='index'),
     path('cinema_circle/register', views.register_page, name='register_page'),
-    path('cinema_circle/login', views.login_page, name='login_page'),
-    path('cinema_circle/recommendations', views.login, name='login'),
+    path('cinema_circle/login_page', views.login_page, name='login_page'),
+    path('cinema_circle/login', views.authenticate, name='login'),
+    path('cinema_circle/logout', views.logout, name='logout'),
     path('cinema_circle/recommendations', views.recommendations, name='recommendations'),
     path('cinema_circle/movies/<str:id>', views.movie_details, name='movie_details'),
     path('cinema_cirlce/user/<str:id>', views.get_user, name='view_user_page'),
     path('cinema_circle/movies/<str:id>/reviews/add', views.add_review, name='add_review'),
     path('cinema_circle/user/recommanded_users', views.get_recommanded_users, name='get_recommanded_users'),
     path('cinema_circle/user/profile', views.get_user_profile, name='get_user_profile'),
+    path('cinema_circle/user/update_preferences', views.update_preferences, name='update_preferences')
 ]
