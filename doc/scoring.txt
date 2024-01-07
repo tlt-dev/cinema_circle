@@ -1,0 +1,26 @@
+Scoring des genres (start point 100) :
+    - Films watched : +4 si vu dans les 3 jours/+3 si vu dans la semaine/+2 si vu dans les deux semaines/+1 après
+    - Films liked : +7 si liké dans les 3jours/ +5 si liké dans la semaine/+2 si liké dans les deux semaines/+3 après
+    - Review if liked : +15 si reviewed dans les 3 jours/ +12 si reviewed dans la semaine/ +9 si reviewed dans les deux semaines/ + 6 après
+    - Film disliked : -7 si liké dans les 3jours/ -5 si liké dans la semaine/-2 si liké dans les deux semaines/-3 après
+    - Review if disliked : -15 si reviewed dans les 3 jours/ -12 si reviewed dans la semaine/ -9 si reviewed dans les deux semaines/ - 6 après
+    - If genre in user preference : *1,2 (à voir) 
+    
+Comparaison finale des films :
+    - exclure les films vus
+    - cosine_similarity sur les genres
+    - si des ex aequo : à voir pour appliquer sur les acteurs et réalisateurs
+
+Score d'intérêt du profil (start point 0) :
+    - Dernières activités :
+        - Film vu : 1 jour = +25, 3 jours = + 20, une semaine = +10, deux semaines = +5, après rien
+        - Like/dislike : 1 jour = +35, 3 jours = + 30, une semaine = +25, deux semaines = +20, après rien
+        - Review : 1 jour = +45, 3 jours = + 40, une semaine = +35, deux semaines = +25, après rien
+    - nombre de films vus * 1
+    - nombre de likes *1,5
+    - nombre de dislikes * 1,5
+    - nombres de reviews *2
+
+Comparaison finale des users :
+    - cosine similarity entre les genres du LoggedUser et de les autres users
+    - si ex aequo, cosine similarity entre les films vu par le LoggedUser et les autres users

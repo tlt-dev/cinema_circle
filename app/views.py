@@ -25,7 +25,7 @@ def login_page(request):
 def login(request):
     # TODO: Process authentification
 
-    # return render(request, 'movie_recommandations.html')
+     # return render(request, 'movie_recommandations.html')
     return recommendations(request)
 
 
