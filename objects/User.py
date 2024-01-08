@@ -1,9 +1,21 @@
 from bson import ObjectId, json_util
+import pymongo
+from pymongo.server_api import ServerApi
 
-from db_utlis import get_document_db
+uri = "mongodb+srv://tlaurent:HvpXxn86hFN8jd4E@cinemacirclecluster.dclhvwy.mongodb.net/?retryWrites=true&w=majority"
+# Create a new client and connect to the server
+client = pymongo.MongoClient(uri)
 
-db, client = get_document_db()
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
+db = client['cinema_circle']
+movie_collection = db['movie']
 user_collection = db['user']
+
 
 
 class User:
@@ -39,6 +51,7 @@ class User:
         }
 
     def user_exist(self):
+        print(user_collection.find_one({'email': self.email}))
         if user_collection.find_one({'email': self.email}) is not None:
             return True
         return False

@@ -1,4 +1,5 @@
 import datetime
+import json
 import random
 
 from bson import ObjectId, json_util
@@ -11,16 +12,25 @@ from db_utlis import get_document_db
 from objects.User import User
 from utils_functions import get_genres
 import pymongo
+from pymongo.server_api import ServerApi
 
 import logging
 logger = logging.getLogger("mylogger")
 
-client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
-document_db = client['cinema_circle']
-movie_collection = document_db['movie']
-user_collection = document_db['user']
 
+uri = "mongodb+srv://tlaurent:HvpXxn86hFN8jd4E@cinemacirclecluster.dclhvwy.mongodb.net/?retryWrites=true&w=majority"
+# Create a new client and connect to the server
+client = pymongo.MongoClient(uri)
 
+# try:
+#     client.admin.command('ping')
+#     print("Pinged your deployment. You successfully connected to MongoDB!")
+# except Exception as e:
+#     print(e)
+
+db = client['cinema_circle']
+movie_collection = db['movie']
+user_collection = db['user']
 
 def index(request):
     return render(request, 'index.html')
@@ -63,6 +73,7 @@ def login_page(request):
 @require_http_methods(['POST'])
 def authenticate(request):
     user = User(email=request.POST.get('email'), password=request.POST.get('password'))
+    print(user)
     if user.user_exist():
         user = user.get_by_email()
         if user is not None:
