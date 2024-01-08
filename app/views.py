@@ -1,7 +1,7 @@
 import datetime
 import random
 
-from bson import ObjectId
+from bson import ObjectId, json_util
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
@@ -40,17 +40,19 @@ def register(request):
         email=request.POST.get('email'),
         password=request.POST.get('password'),
         preferences=[request.POST.get('preference_1'), request.POST.get('preference_2'), request.POST.get('preference_3')],
-        profile_pic_path='avatar_' + str(random.randint(1,10)) + 'png'
+        profile_pic_path='avatar_' + str(random.randint(1,10)) + '.png'
     )
 
     if user.user_exist():
         return HttpResponse('The email is already registered. Please try to login.')
     else:
         try:
-            user.create()
+            user.id = user.create()
         except Exception as e:
             print(e)
         else:
+            print(user)
+            request.session['user'] = user.to_json()
             return redirect('recommendations')
 
 
@@ -65,7 +67,6 @@ def authenticate(request):
         user = user.get_by_email()
         if user is not None:
             request.session['user'] = user.to_json()
-            request.session['user']['is_authenticated'] = True
             return redirect('recommendations')
     else:
         return HttpResponse({'message': 'Invalid email or password'})

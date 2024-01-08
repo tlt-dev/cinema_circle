@@ -16,7 +16,7 @@
                     {% endfor %}
                 {% endif %}
             </center>
-            <form action="" method="POST">
+            <form action="{% url 'register' %}" method="POST">
                 {% csrf_token %}
                 <h1 class="flex justify-content-center text-center">
                     <a href="{% url 'index' %}" name="Home">

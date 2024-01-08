@@ -18,7 +18,7 @@ class User:
             self.preferences = user['preferences'] if 'preferences' in user else None
             self.profile_pic_path = profile_pic_path
         else:
-            self.id = id
+            self.id = str(id)
             self.first_name = first_name
             self.last_name = last_name
             self.email = email
@@ -29,7 +29,7 @@ class User:
 
     def to_json(self):
         return {
-            'id': self.id,
+            'id': str(self.id),
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
@@ -45,7 +45,7 @@ class User:
 
     def create(self):
         try:
-            user_collection.insert_one({
+             result = user_collection.insert_one({
                 'first_name': self.first_name,
                 'last_name': self.last_name,
                 'email': self.email,
@@ -55,6 +55,8 @@ class User:
             })
         except Exception as e:
             print("Error while creating user. Error : ", e)
+        else:
+            return result.inserted_id
 
     def delete(self):
         try:

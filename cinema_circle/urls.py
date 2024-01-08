@@ -22,7 +22,8 @@ from app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('cinema_circle/', views.index, name='index'),
-    path('cinema_circle/register', views.register_page, name='register_page'),
+    path('cinema_circle/register_page', views.register_page, name='register_page'),
+    path('cinema_circle/register', views.register, name='register'),
     path('cinema_circle/login_page', views.login_page, name='login_page'),
     path('cinema_circle/login', views.authenticate, name='login'),
     path('cinema_circle/logout', views.logout, name='logout'),
