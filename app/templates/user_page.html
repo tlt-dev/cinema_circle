@@ -12,10 +12,9 @@
         <div class="row mt-3" style="height: 85vh; max-height: 85vh">
             <div class="col-3">
                 <div class="row">
-                    {% with  'assets/img/avatars/'|add:user.profile_pic_path as avatar_file_path %}
-                        <img src="{% static avatar_file_path %}" class="rounded-circle w-50 mt-5 mx-auto"
-                             alt="User profile avatar">
-                    {% endwith %}
+                    <img src="{% static 'assets/img/avatars/'|add:user.profile_pic_path %}"
+                         class="rounded-circle w-50 mt-5 mx-auto"
+                         alt="User profile avatar">
                 </div>
                 <div class="row mt-3 text-center">
                     <h5>{{ user.first_name }} {{ user.last_name }}</h5>
@@ -134,9 +133,11 @@
                                                   class="text-white"><u>{{ activity.movie.title }}</u></a></p>
 
                                     {% else %}
-                                        <p class="text-secondary"><span class="text-white">{{ user.first_name }} {{ user.last_name }}</span> has
+                                        <p class="text-secondary"><span
+                                                class="text-white">{{ user.first_name }} {{ user.last_name }}</span> has
                                             {{ activity.action }} <a
-                                                    href="{% url 'movie_details' activity.movie.id %}" class="text-white"><u>{{ activity.movie.title }}</u></a></p>
+                                                    href="{% url 'movie_details' activity.movie.id %}"
+                                                    class="text-white"><u>{{ activity.movie.title }}</u></a></p>
                                     {% endif %}
                                 </div>
                                 <div class="col-2">

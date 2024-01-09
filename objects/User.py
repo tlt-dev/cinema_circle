@@ -1,31 +1,37 @@
 from bson import ObjectId, json_util
 import pymongo
+from neo4j import GraphDatabase
 
 client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
 document_db = client['cinema_circle']
 user_collection = document_db['user']
 
+graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsmdb_2024"))
+
 
 class User:
-    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, preferences=None, profile_pic_path=None, id=None):
+    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, creation_date=None):
         ''' Use user arg if user dict from db'''
         if user is not None:
-            self.id = str(user['_id'])
+            self.id = str(user['_id']) if "_id" in user.keys() else str(user['id'])
             self.first_name = user['first_name']
             self.last_name = user['last_name']
             self.email = user['email']
             self.password = user['password']
-            self.preferences = user['preferences'] if 'preferences' in user else None
-            self.profile_pic_path = profile_pic_path
+            self.profile_pic_path = user['profile_pic_path']
+            self.creation_date = user['creation_date']
         else:
             self.id = str(id)
             self.first_name = first_name
             self.last_name = last_name
             self.email = email
             self.password = password
-            self.preferences = preferences
             self.profile_pic_path = profile_pic_path
-
+            self.creation_date = creation_date
+        self.watched_list = None
+        self.commented_movies = None
+        self.favorite_genres = None
+        self.last_activities = None
 
     def to_json(self):
         return {
@@ -34,8 +40,8 @@ class User:
             'last_name': self.last_name,
             'email': self.email,
             'password': self.password,
-            'preferences': self.preferences,
-            'profile_pic_path': self.profile_pic_path
+            'profile_pic_path': self.profile_pic_path,
+            'creation_date': self.creation_date.strftime('%Y/%m/%d'),
         }
 
     def user_exist(self):
@@ -51,7 +57,6 @@ class User:
                 'last_name': self.last_name,
                 'email': self.email,
                 'password': self.password,
-                'preferences': self.preferences,
                 'profile_pic_path': self.profile_pic_path
             })
         except Exception as e:
@@ -96,7 +101,7 @@ class User:
             else:
                 return user
 
-    def update_multiple_fields(self, id, first_name=None, last_name=None, email=None, password=None, preferences=None):
+    def update_multiple_fields(self, id, first_name=None, last_name=None, email=None, password=None):
         fields = {}
         fields['id'] = ObjectId(id)
         if first_name:
@@ -107,17 +112,15 @@ class User:
             fields['email'] = email
         if password:
             fields['password'] = password
-        if preferences:
-            fields['preferences'] = preferences
 
         try:
-            user_collection.updateOne({fields})
+            user_collection.update_one({fields})
         except Exception as e:
             print("Error while updating user. Error : ", e)
 
     def set_first_name(self, first_name):
         try:
-            user_collection.updateOne({'_id': ObjectId(self.id), 'first_name': first_name})
+            user_collection.update_one({'_id': ObjectId(self.id), 'first_name': first_name})
         except Exception as e:
             print("Error while updating user. Error : ", e)
         else:
@@ -125,7 +128,7 @@ class User:
 
     def set_last_name(self, last_name):
         try:
-            user_collection.updateOne({'_id': ObjectId(self.id), 'last_name': last_name})
+            user_collection.update_one({'_id': ObjectId(self.id), 'last_name': last_name})
         except Exception as e:
             print("Error while updating user. Error : ", e)
         else:
@@ -133,27 +136,26 @@ class User:
 
     def set_email(self, email):
         try:
-            user_collection.updateOne({'_id': ObjectId(self.id), 'email': email})
+            user_collection.update_one({'_id': ObjectId(self.id), 'email': email})
         except Exception as e:
             print("Error updating user. Error : ", e)
         else:
             self.email = email
 
-    def set_password(self, password):
-        try:
-            user_collection.updateOne({'_id': ObjectId(self), 'password': password})
-        except Exception as e:
-            print("Error updating user. Error : ", e)
-        else:
-            self.password = password
+    def get_watched_list(self):
+        query = "MATCH (u:User)-[:SEEN]->(m:Movie) WHERE u:id = $id RETURN m"
 
-    def set_preferences(self, preferences):
-        try:
-            user_collection.update_one({'_id': ObjectId(self.id)}, {"$set": {'preferences': preferences}})
-        except Exception as e:
-            print("Error updating user. Error : ", e)
-        else:
-            self.preferences = preferences
+        records, summary, keys = graph_driver.execute_query(query, id=self.id, database="cinemacircle")
 
+        for record in records:
+            print(record)
 
+    def get_reviews_list(self):
+        pass
+
+    def get_last_activities(self):
+        pass
+
+    def get_favorites_genres(self):
+        pass
 
