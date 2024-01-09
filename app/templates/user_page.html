@@ -28,18 +28,12 @@
                     </div>
                 </div>
             </div>
-            <div class="col-8">
+            <div class="col-6">
                 <ul class="nav nav-tabs" id="user_tab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link text-white bg-dark active" id="watched-tab" data-bs-toggle="tab"
                                 data-bs-target="#watched"
                                 type="button" role="tab" aria-controls="watched" aria-selected="true">Watched list
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link text-white bg-dark" id="reviews-tab" data-bs-toggle="tab"
-                                data-bs-target="#reviews"
-                                type="button" role="tab" aria-controls="reviews" aria-selected="false">Reviews
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -66,48 +60,27 @@
                 <div class="tab-content" id="userTabContent"
                      style="overflow-y: auto; overflow-x: hidden; max-height: 80vh">
                     <div class="tab-pane fade show active" id="watched" role="tabpanel" aria-labelledby="watched-tab">
-                        {% for movie in user.watched_list %}
-                            <div class="row mt-3 ms-3">
-                                <div class="col-2">
-                                    <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}"
-                                         height="150px">
+                        <div class="row mt-3 ms-3">
+                            {% for movie in user.watched_list %}
+                                <div class="col-3 mt-2">
+                                    <div class="row">
+                                        {% if not movie.poster_path %}
+                                            <img src="{% static 'assets/img/default_poster.jpg' %}"
+                                             style="width: 150px; height: 190px">
+                                        {% else %}
+                                        <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}"
+                                             style="width: 150px">
+                                        {% endif %}
+
+                                    </div>
+                                    <div class="row">
+                                        <a href="{% url 'movie_details' movie.id %}"
+                                           class="text-white"><u>{{ movie.title }}</u></a>
+                                    </div>
                                 </div>
-                                <div class="col-9">
-                                    <h5><a href="{% url 'movie_details' movie|mongo_id %}"
-                                           class="text-white"><u>{{ movie.title }}</u></a> - <span
-                                            class="text-secondary">{{ movie.directors.0.name }} (
-                                        {% with movie.release_date|make_list as date %}
-                                            {{ date|slice:":4"|join:'' }}{% endwith %})</span>
-                                    </h5>
-                                    <p class="text-secondary">Cast : <span
-                                            class="text-white">{% for actor in movie.cast %}
-                                        {{ actor.name }}, {% endfor %}</span>
-                                    </p>
-                                    <small>{{ movie.overview }}</small>
-                                </div>
-                            </div>
-                            <hr>
-                        {% endfor %}
-                    </div>
-                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                        {% for commented_movie in user.commented_movies %}
-                            <div class="row mt-3 ms-3">
-                                <div class="col-2">
-                                    <img src="https://image.tmdb.org/t/p/w500/{{ commented_movie.movie.poster_path }}"
-                                         height="150px">
-                                    <p><a href="{% url 'movie_details' commented_movie.movie|mongo_id %}"
-                                          class="text-white"><u>{{ commented_movie.movie.title }}</u></a></p>
-                                </div>
-                                <div class="col-9 my-auto">
-                                    <h5>{{ commented_movie.comment.title }}</h5>
-                                    <p>
-                                        {{ commented_movie.comment.content }}
-                                    </p>
-                                    <span class="text-muted">{{ commented_movie.comment.date }}</span>
-                                </div>
-                            </div>
-                            <hr class="w-75 m-auto mt-2">
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
+
                     </div>
                     <div class="tab-pane fade" id="genres" role="tabpanel" aria-labelledby="genres-tab">
                         <div class="row mt-3">
@@ -146,6 +119,26 @@
                                 <hr>
                             </div>
                         {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="row text-center" style="height: 80vh">
+                    <div class="col-10 mt-3 bg-dark rounded mx-auto align-middle py-3" style="height:min-content">
+                        <h2>{{ user.watched_list|length }}</h2>
+                        <p>Movies seen</p>
+                    </div>
+                    <div class="col-10 mt-3 bg-dark rounded mx-auto align-middle py-3" style="height:min-content">
+                        <h2>{{ user.liked_movies_count|length }}</h2>
+                        <p>Movies liked</p>
+                    </div>
+                    <div class="col-10 mt-3 bg-dark rounded mx-auto align-middle py-3" style="height:min-content">
+                        <h2>{{ user.disliked_movies_count|length }}</h2>
+                        <p>Movies disliked</p>
+                    </div>
+                    <div class="col-10 mt-3 bg-dark rounded mx-auto align-middle py-3" style="height:min-content">
+                        <h2>{{ user.reviews_count|length }}</h2>
+                        <p>Reviews count</p>
                     </div>
                 </div>
             </div>

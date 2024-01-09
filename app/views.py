@@ -136,60 +136,56 @@ def get_user(request, id):
     user = User(user_collection.find_one({'_id': ObjectId(id)}))
     logged_user = LoggedUser(user=request.session['user'])
 
-    follows = False
-    if logged_user.is_following(user.id):
-        follows = True
+    user.get_watched_list()
 
-    user.watched_list = list(movie_collection.find().limit(15))
-
-    count = 0
-    user.commented_movies = []
-    for movie in user.watched_list:
-        user.commented_movies.append({
-            "movie": movie,
-            "comment": movie["comments"][0]
-        })
-        count += 1
-        if count == 10:
-            break
-
-    genres = {}
-    for movie in user.watched_list:
-        for genre in movie["genre"]:
-            if genre not in genres.keys():
-                genres[genre] = 1
-            else:
-                genres[genre] += 1
-
-    user.favorite_genres = dict(sorted(genres.items(), key=lambda x:x[1], reverse=True))
-    user.last_activities = [
-        {
-            "action": "review",
-            "review_id": "...",
-            "movie": {
-                "id": "657b2245d448da2cface22ea",
-                "title": "The Godfather",
-            },
-            "date": datetime.date(2024, 1, 4)
-        },
-        {
-            "action": "liked",
-            "movie": {
-                "id": "657b2245d448da2cface22ea",
-                "title": "The Godfather",
-
-            },
-            "date": datetime.date(2024, 1, 4)
-        },
-        {
-            "action": "watched",
-            "movie": {
-                "id": "657b2245d448da2cface22ea",
-                "title": "The Godfather",
-            },
-            "date": datetime.date(2024, 1, 4)
-        }
-    ]
+    # count = 0
+    # user.commented_movies = []
+    # for movie in user.watched_list:
+    #     user.commented_movies.append({
+    #         "movie": movie,
+    #         "comment": movie["comments"][0]
+    #     })
+    #     count += 1
+    #     if count == 10:
+    #         break
+    #
+    # genres = {}
+    # for movie in user.watched_list:
+    #     for genre in movie["genre"]:
+    #         if genre not in genres.keys():
+    #             genres[genre] = 1
+    #         else:
+    #             genres[genre] += 1
+    #
+    # user.favorite_genres = dict(sorted(genres.items(), key=lambda x:x[1], reverse=True))
+    # user.last_activities = [
+    #     {
+    #         "action": "review",
+    #         "review_id": "...",
+    #         "movie": {
+    #             "id": "657b2245d448da2cface22ea",
+    #             "title": "The Godfather",
+    #         },
+    #         "date": datetime.date(2024, 1, 4)
+    #     },
+    #     {
+    #         "action": "liked",
+    #         "movie": {
+    #             "id": "657b2245d448da2cface22ea",
+    #             "title": "The Godfather",
+    #
+    #         },
+    #         "date": datetime.date(2024, 1, 4)
+    #     },
+    #     {
+    #         "action": "watched",
+    #         "movie": {
+    #             "id": "657b2245d448da2cface22ea",
+    #             "title": "The Godfather",
+    #         },
+    #         "date": datetime.date(2024, 1, 4)
+    #     }
+    # ]
 
     return render(request, 'user_page.html', {'user': user})
 
@@ -229,58 +225,57 @@ def get_user_profile(request):
     genres = get_genres()
 
     user = LoggedUser(user=request.session.get('user'))
-    print(user.first_name)
 
-    user.watched_list = list(movie_collection.find().limit(15))
+    user.get_watched_list()
 
-    count = 0
-    user.commented_movies = []
-    for movie in user.watched_list:
-        user.commented_movies.append({
-            "movie": movie,
-            "comment": movie["comments"][0]
-        })
-        count += 1
-        if count == 10:
-            break
-
-    genres_count = {}
-    for movie in user.watched_list:
-        for genre in movie["genre"]:
-            if genre not in genres_count.keys():
-                genres_count[genre] = 1
-            else:
-                genres_count[genre] += 1
-
-    user.favorite_genres = dict(sorted(genres_count.items(), key=lambda x: x[1], reverse=True))
-    user.last_activities = [
-        {
-            "action": "review",
-            "review_id": "...",
-            "movie": {
-                "id": "657b2245d448da2cface22ea",
-                "title": "The Godfather",
-            },
-            "date": datetime.date(2024, 1, 4)
-        },
-        {
-            "action": "liked",
-            "movie": {
-                "id": "657b2245d448da2cface22ea",
-                "title": "The Godfather",
-
-            },
-            "date": datetime.date(2024, 1, 4)
-        },
-        {
-            "action": "watched",
-            "movie": {
-                "id": "657b2245d448da2cface22ea",
-                "title": "The Godfather",
-            },
-            "date": datetime.date(2024, 1, 4)
-        }
-    ]
+    # count = 0
+    # user.commented_movies = []
+    # for movie in user.watched_list:
+    #     user.commented_movies.append({
+    #         "movie": movie,
+    #         "comment": movie["comments"][0]
+    #     })
+    #     count += 1
+    #     if count == 10:
+    #         break
+    #
+    # genres_count = {}
+    # for movie in user.watched_list:
+    #     for genre in movie["genre"]:
+    #         if genre not in genres_count.keys():
+    #             genres_count[genre] = 1
+    #         else:
+    #             genres_count[genre] += 1
+    #
+    # user.favorite_genres = dict(sorted(genres_count.items(), key=lambda x: x[1], reverse=True))
+    # user.last_activities = [
+    #     {
+    #         "action": "review",
+    #         "review_id": "...",
+    #         "movie": {
+    #             "id": "657b2245d448da2cface22ea",
+    #             "title": "The Godfather",
+    #         },
+    #         "date": datetime.date(2024, 1, 4)
+    #     },
+    #     {
+    #         "action": "liked",
+    #         "movie": {
+    #             "id": "657b2245d448da2cface22ea",
+    #             "title": "The Godfather",
+    #
+    #         },
+    #         "date": datetime.date(2024, 1, 4)
+    #     },
+    #     {
+    #         "action": "watched",
+    #         "movie": {
+    #             "id": "657b2245d448da2cface22ea",
+    #             "title": "The Godfather",
+    #         },
+    #         "date": datetime.date(2024, 1, 4)
+    #     }
+    # ]
 
     return render(request, 'user_profile.html', {"user": user, "genres": genres})
 

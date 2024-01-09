@@ -1,6 +1,9 @@
+from xml.dom.minidom import Document
+
 from bson import ObjectId, json_util
 import pymongo
 from neo4j import GraphDatabase
+
 
 client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
 document_db = client['cinema_circle']
@@ -29,7 +32,7 @@ class User:
             self.profile_pic_path = profile_pic_path
             self.creation_date = creation_date
         self.watched_list = None
-        self.commented_movies = None
+        self.reviews_count = None
         self.favorite_genres = None
         self.last_activities = None
 
@@ -92,15 +95,6 @@ class User:
             else:
                 return user
 
-    def get_by_email(self):
-        if self.email is not None:
-            try:
-                user = User(user=user_collection.find_one({'email': self.email}))
-            except Exception as e:
-                print("User does not exist. Error : ", e)
-            else:
-                return user
-
     def update_multiple_fields(self, id, first_name=None, last_name=None, email=None, password=None):
         fields = {}
         fields['id'] = ObjectId(id)
@@ -143,14 +137,14 @@ class User:
             self.email = email
 
     def get_watched_list(self):
-        query = "MATCH (u:User)-[:SEEN]->(m:Movie) WHERE u:id = $id RETURN m"
+        query = "MATCH (u:User {id: $id})-[:SEEN]->(m:Movie) RETURN m"
 
         records, summary, keys = graph_driver.execute_query(query, id=self.id, database="cinemacircle")
 
-        for record in records:
-            print(record)
+        self.watched_list = [record.data()['m'] for record in records]
 
-    def get_reviews_list(self):
+
+    def get_reviews_count(self):
         pass
 
     def get_last_activities(self):

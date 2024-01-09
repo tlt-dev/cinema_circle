@@ -15,7 +15,7 @@ class LoggedUser(User):
     def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, preferences=None):
         if user is not None:
             User.__init__(self, user=user)
-            self.preferences = user['preferences'] if preferences in user else None
+            self.preferences = user['preferences'] if 'preferences' in user else None
         else:
             User.__init__(self, first_name=first_name, last_name=last_name, email=email, password=password, profile_pic_path=profile_pic_path, id=id)
             self.preferences = preferences
@@ -50,6 +50,15 @@ class LoggedUser(User):
             user_collection.updateOne({fields})
         except Exception as e:
             print("Error while updating user. Error : ", e)
+
+    def get_by_email(self):
+        if self.email is not None:
+            try:
+                user = LoggedUser(user=user_collection.find_one({'email': self.email}))
+            except Exception as e:
+                print("User does not exist. Error : ", e)
+            else:
+                return user
 
     def set_password(self, password):
         try:
