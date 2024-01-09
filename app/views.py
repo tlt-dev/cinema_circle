@@ -117,12 +117,12 @@ def recommendations(request):
 
 
 def movie_details(request, id):
-    movie = movie_collection.find_one({'_id': ObjectId('657b4424e7be990ba7cdea2d')})
+    movie = movie_collection.find_one({'_id': ObjectId(id)})
 
     logged_user = LoggedUser(user=request.session['user'])
 
     records, summary, keys = graph_driver.execute_query(
-        "MATCH (lu:User)-[:SEEN]->(m:Movie) WHERE lu.id = '{}' and m.id = '{}' RETURN lu".format(logged_user.id, str(movie['_id'])),
+        "MATCH (lu:User)-[:SEEN]->(m:Movie) WHERE lu.id = '{}' and m.id = '{}' RETURN lu".format(logged_user.id, str(id)),
         database_="cinemacircle",
     )
 
