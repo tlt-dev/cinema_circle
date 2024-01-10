@@ -90,18 +90,19 @@ def logout(request):
 def recommendations(request):
     logged_user = LoggedUser(user=request.session['user'])
 
+    displayed_movies = list()
     recommandations = [
         {
             "category_title": "Popular movies",
             "movie_list": list(movie_collection.find().limit(6))
         }]
-    
     logged_user.get_favorites_genres()
     
-    for genre in logged_user.favorite_genres:
-            recommandations.append({"category_title":"Because you like " + genre["name"] + " movies", 
-                                    "movie_list": logged_user.get_recommended_movie_from_genre(genre["name"])})
-
+    for genre in logged_user.favorite_genres[:3]:
+        to_display = logged_user.get_recommended_movie_from_genre(genre["genre"], [d['_id'] for d in displayed_movies if '_id' in d])
+        recommandations.append({"category_title":"Because you like " + genre["genre"] + " movies", 
+                                    "movie_list": to_display})
+        displayed_movies += to_display
 
     """
         {
@@ -118,7 +119,6 @@ def recommendations(request):
         }
         ]
         """
-
     return render(request, 'movie_recommandations.html', {'recommandations': recommandations})
 
 
@@ -139,6 +139,7 @@ def get_user(request, id):
     logged_user = LoggedUser(user=request.session['user'])
 
     user.get_watched_list()
+    print(user.watched_list)
 
     # count = 0
     # user.commented_movies = []

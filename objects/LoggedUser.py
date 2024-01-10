@@ -128,19 +128,40 @@ class LoggedUser(User):
 
         return records[0].data()['return_value']
     
-    def get_recommended_movie_from_genre(self, genre):
-        followed_user_movies = self.get_followed_user_movies()
+    def get_recommended_movie_from_genre(self, genre, displayed_movies):
+        followed_user_movies = self.get_followed_user_movies(displayed_movies)
+        followed_user_score = self.get_followed_user_score()
+        movie_list = {}
+        for user_id, movies in followed_user_movies.items():
+            for movie in movies:
+                if movie["genre"] == genre:
+                    if movie["liked"] == 1:
+                        score = followed_user_score[user_id]
+                    else:
+                        score = followed_user_score[user_id] / 4
+                    if movie["movie"]["id"] in movie_list:
+                        movie_list[movie["movie"]["id"]]["score"] += score
+                    else:
+                        movie_list[movie["movie"]["id"]] = {"movie": movie["movie"], "score": score}
+                        
+        movie_list = dict(sorted(movie_list.items(), key=lambda x: x[1]['score'], reverse=True))
+        recommended_movies = [movie["movie"] for _,movie in dict(list(movie_list.items())[:6]).items()]
+        for i in range(len(recommended_movies)):
+            recommended_movies[i]["_id"] =  recommended_movies[i].pop("id")
+        
+        return recommended_movies
 
-    def get_followed_user_movies(self):
+    def get_followed_user_movies(self,displayed_movies):
         query = """
             MATCH (user:User {id:$id})-[:FOLLOWS]->(followed:User)
             MATCH (followed)-[seen:SEEN]->(movie:Movie)
+            WHERE NOT movie.id  IN $displayed_movies
             OPTIONAL MATCH (followed)-[liked:LIKED]->(movie) WHERE liked.like <> 0
             MATCH (movie)-[:TYPE_OF]->(genre:Genre)
             RETURN followed AS FollowedUser, 
             COLLECT(DISTINCT {movie: movie, seen: date(seen.date), liked: liked.like, genre: genre.name}) AS Movies
         """
-        records, summary, keys = graph_driver.execute_query(query, id=self.id)
+        records, summary, keys = graph_driver.execute_query(query, id=self.id, displayed_movies=displayed_movies)
     
         result = {}
         for record in records:
@@ -154,4 +175,66 @@ class LoggedUser(User):
                 })
             result[record.data()['FollowedUser']["id"]] = movies_dict
         return result
+    
+    def get_followed_user_score(self):
+        query = """
+            MATCH (user:User {id: $id})-[:FOLLOWS]->(followed:User)
+            OPTIONAL MATCH (followed)-[seen:SEEN]->(movie)
+            WITH user, followed, COALESCE(SUM(
+                CASE
+                WHEN datetime(seen.date) >= datetime() - duration('P1D') THEN 25
+                WHEN datetime(seen.date) >= datetime() - duration('P3D') THEN 20
+                WHEN datetime(seen.date) >= datetime() - duration('P1W') THEN 10
+                WHEN datetime(seen.date) >= datetime() - duration('P2W') THEN 5
+                ELSE 0
+                END
+            ), 0) AS seenScore
+            OPTIONAL MATCH (followed)-[liked:LIKED]->(movie)
+            WITH followed, seenScore, COALESCE(SUM(
+                CASE
+                WHEN datetime(liked.date) >= datetime() - duration('P1D') THEN 35
+                WHEN datetime(liked.date) >= datetime() - duration('P3D') THEN 30
+                WHEN datetime(liked.date) >= datetime() - duration('P1W') THEN 25
+                WHEN datetime(liked.date) >= datetime() - duration('P2W') THEN 20
+                ELSE 0
+                END
+            ), 0) AS likedScore
+            OPTIONAL MATCH (followed)-[reviewed:REVIEWED]->(movie)
+            WITH followed, seenScore, likedScore, COALESCE(SUM(
+                CASE
+                WHEN datetime(reviewed.date) >= datetime() - duration('P1D') THEN 45
+                WHEN datetime(reviewed.date) >= datetime() - duration('P3D') THEN 40
+                WHEN datetime(reviewed.date) >= datetime() - duration('P1W') THEN 35
+                WHEN datetime(reviewed.date) >= datetime() - duration('P2W') THEN 25
+                ELSE 0
+                END
+            ), 0) AS reviewedScore
+            WITH followed, 
+                seenScore + likedScore + reviewedScore AS activityScore
+            OPTIONAL MATCH (followed)-[seen:SEEN]->(movie)
+            WITH followed, activityScore, COUNT(seen) AS moviesWatched
+            OPTIONAL MATCH (followed)-[liked:LIKED]->(movie)
+            WHERE liked.like = 0
+            WITH followed, activityScore, moviesWatched, COUNT(liked) AS likes
+            OPTIONAL MATCH (followed)-[disliked:LIKED]->(movie)
+            WHERE disliked.like = -1
+            WITH followed, activityScore, moviesWatched, likes, COUNT(disliked) AS dislikes
+            OPTIONAL MATCH (followed)-[reviewed:REVIEWED]->(movie)
+            WITH followed, activityScore, moviesWatched, likes, dislikes, COUNT(reviewed) AS reviews
+            RETURN followed, 
+                activityScore + 
+                moviesWatched * 1 + 
+                likes * 1.5 + 
+                dislikes * 1.5 + 
+                reviews * 2 AS InterestScore
+            ORDER BY InterestScore DESC
+        """
+        records, summary, keys = graph_driver.execute_query(query, id=self.id)
+
+        result = {}
+        for record in records:
+            result[record.data()["followed"]["id"]] = record.data()["InterestScore"]
+            
+        return result
+
 
