@@ -13,7 +13,7 @@ graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsm
 
 
 class User:
-    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, creation_date=None, preferences=None):
+    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, creation_date=None):
         ''' Use user arg if user dict from db'''
         if user is not None:
             self.id = str(user['_id']) if "_id" in user.keys() else str(user['id'])
@@ -23,7 +23,6 @@ class User:
             self.password = user['password']
             self.profile_pic_path = user['profile_pic_path']
             self.creation_date = user['creation_date']
-            self.preferences = user['preferences'] if 'preferences' in user else None
         else:
             self.id = str(id)
             self.first_name = first_name
@@ -32,13 +31,12 @@ class User:
             self.password = password
             self.profile_pic_path = profile_pic_path
             self.creation_date = creation_date
-            self.preferences = preferences
         self.watched_list = None
         self.reviews_count = None
         self.liked_movies_count = None
         self.disliked_movies_count = None
-        self.favorite_genres = None
-        self.last_activities = None
+        self.favorite_genres = []
+        self.last_activities = []
 
     def to_json(self):
         return {
@@ -140,35 +138,78 @@ class User:
         else:
             self.email = email
 
-    def get_watched_list(self):
-        query = "MATCH (u:User {id: $id})-[:SEEN]->(m:Movie) RETURN m"
+    def get_watched_list(self, filter="date_desc"):
+
+        if filter == "date_desc": order_by = "r.date DESC"
+        if filter == "date_asc": order_by = "r.date ASC"
+        if filter == "title_asc": order_by = "m.title ASC"
+        if filter == "title_desc": order_by = "m.title DESC"
+
+        query = "MATCH (u:User {id: $id})-[r:SEEN]->(m:Movie) RETURN m ORDER BY " + order_by
 
         records, summary, keys = graph_driver.execute_query(query, id=self.id)
 
         self.watched_list = [record.data()['m'] for record in records]
 
     def get_reviews_count(self):
-        pass
-
-    def get_last_activities(self):
-        pass
-
-    def get_favorites_genres(self):
-        query = "MATCH (user:User {id: $id})-[r:LIKED|REVIEWED|SEEN]->(m:Movie)-[:TYPE_OF]->(g:Genre) WITH user, g, r, m, CASE WHEN r:SEEN THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 4 WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 3 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 2 ELSE 1 END WHEN r:LIKED AND r.like = 0 THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 7 WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 5 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 2 ELSE 3 END WHEN r:REVIEWED AND r.like = 0 THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 15 WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 12 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 9 ELSE 6 END WHEN r:LIKED AND r.like = -1 THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN -7 WHEN datetime( r.date) >= datetime() - duration('P1W') THEN -5 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN -2 ELSE -3 END WHEN r:REVIEWED AND r.like = -1 THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN -15 WHEN datetime(r.date) >= datetime() - duration('P1W') THEN -12 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN -9 ELSE -6 END END AS score WITH g, SUM(score) + 100 AS totalScore RETURN g AS Genre, totalScore ORDER BY totalScore DESC"
+        query = "MATCH (u:User {id: $id})-[r:REVIEWED]->() RETURN count(r) as result"
 
         records, summary, keys = graph_driver.execute_query(query, id=self.id)
 
-        self.favorite_genres = []
+        self.reviews_count = records[0].data()['result']
+
+    def get_last_activities(self, filter='P15D'):
+        if filter == "all":
+            query = "MATCH (u:User {id:$id})-[r:SEEN|LIKED|REVIEWED]->(m:Movie) RETURN u, r, r.date, r.like, m"
+        else:
+            query = "MATCH (u:User {id:$id})-[r:SEEN|LIKED|REVIEWED]->(m:Movie) WHERE datetime(r.date) >= datetime() - duration($duration) RETURN u, r, r.date, r.like, m"
+
+        records, summary, keys = graph_driver.execute_query(query, id=self.id, duration=filter)
+
         for record in records:
-            self.favorite_genres.append({'genre': record.data()['Genre']['name'], 'score': int(record['totalScore'] * 1.1) if record['Genre']['name'] in self.preferences else record['totalScore']})
-        self.favorite_genres = sorted(self.favorite_genres, key=lambda item: item['score'], reverse=True)
+            activity = {
+                "date": record.data()['r.date'].to_native().strftime('%d/%m/%Y'),
+                "movie_id": record.data()['m']['id'],
+                "movie_title": record.data()['m']['title']
+            }
+            if record.data()['r'][1] == "LIKED":
+                if record.data()['r.like'] == 1:
+                    activity["action"] = "liked"
+                else:
+                    activity["action"] = "disliked"
+            else:
+                activity["action"] = record.data()['r'][1].lower()
+            self.last_activities.append(activity)
+        print(self.last_activities)
+
+
+    def get_favorites_genres(self, filter="score_desc"):
+        if filter == "score_desc": order_by = "totalScore DESC"
+        if filter == "score_asc": order_by = "totalScore ASC"
+        if filter == "name_desc": order_by = "g.name DESC"
+        if filter == "name_asc": order_by = "g.name ASC"
+
+        query = "MATCH (user:User {id: $id})-[r:LIKED|REVIEWED|SEEN]->(m:Movie)-[:TYPE_OF]->(g:Genre) WITH user, g, r, m, CASE WHEN r:SEEN THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 4 WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 3 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 2 ELSE 1 END WHEN r:LIKED AND r.like = 0 THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 7 WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 5 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 2 ELSE 3 END WHEN r:REVIEWED AND r.like = 0 THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 15 WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 12 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 9 ELSE 6 END WHEN r:LIKED AND r.like = -1 THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN -7 WHEN datetime( r.date) >= datetime() - duration('P1W') THEN -5 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN -2 ELSE -3 END WHEN r:REVIEWED AND r.like = -1 THEN CASE WHEN datetime(r.date) >= datetime() - duration('P3D') THEN -15 WHEN datetime(r.date) >= datetime() - duration('P1W') THEN -12 WHEN datetime(r.date) >= datetime() - duration('P2W') THEN -9 ELSE -6 END END AS score WITH g, SUM(score) + 100 AS totalScore RETURN g AS Genre, totalScore ORDER BY " + order_by
+        records, summary, keys = graph_driver.execute_query(query, id=self.id)
+
+        for record in records:
+            self.favorite_genres.append({'genre': record.data()['Genre']['name'], 'score': record['totalScore']})
 
 
     def get_liked_movies_count(self):
-        pass
+        query = "MATCH (u:User {id: $id})-[r:LIKED {like: 1}]->() RETURN count(r) as result"
+
+        records, summary, keys = graph_driver.execute_query(query, id=self.id)
+
+        self.liked_movies_count = records[0].data()['result']
+
 
     def get_disliked_movies_count(self):
-        pass
+        query = "MATCH (u:User {id: $id})-[r:LIKED {like: 0}]->() RETURN count(r) as result"
+
+        records, summary, keys = graph_driver.execute_query(query, id=self.id)
+
+        self.disliked_movies_count = records[0].data()['result']
 
 
 

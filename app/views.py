@@ -49,7 +49,6 @@ def register(request):
         last_name=request.POST.get('last_name'),
         email=request.POST.get('email'),
         password=request.POST.get('password'),
-        preferences=[request.POST.get('preference_1'), request.POST.get('preference_2'), request.POST.get('preference_3')],
         profile_pic_path='avatar_' + str(random.randint(1,10)) + '.png'
     )
 
@@ -94,15 +93,15 @@ def recommendations(request):
             "movie_list": list(movie_collection.find().limit(6))
         },
         {
-            "category_title": "Western (from your preferences)",
+            "category_title": "Because you like western",
             "movie_list": list(movie_collection.find().limit(12))[-6:]
         },
         {
-            "category_title": "Thriller (from your preferences)",
+            "category_title": "Because you like Thriller",
             "movie_list": list(movie_collection.find().limit(18))[-6:]
         },
         {
-            "category_title": "Horror (from your preferences)",
+            "category_title": "Because you like Horror",
             "movie_list": list(movie_collection.find().limit(24))[-6:]
         },
         {
@@ -134,62 +133,29 @@ def movie_details(request, id):
     return render(request, 'movie_details.html', {'movie': movie})
 
 
-def get_user(request, id):
+def get_user_page(request, id):
     user = User(user_collection.find_one({'_id': ObjectId(id)}))
-    logged_user = LoggedUser(user=request.session['user'])
 
-    user.get_watched_list()
+    user.get_watched_list(
+        request.GET.get('watched_list_filter')) if 'watched_list_filter' in request.GET else user.get_watched_list()
+    user.get_favorites_genres(request.GET.get(
+        'favorite_genres_filter')) if 'favorite_genres_filter' in request.GET else user.get_favorites_genres()
+    user.get_liked_movies_count()
+    user.get_disliked_movies_count()
+    user.get_reviews_count()
+    user.get_last_activities(request.GET.get(
+        'last_activities_filter')) if 'last_activities_filter' in request.GET else user.get_last_activities()
 
-    # count = 0
-    # user.commented_movies = []
-    # for movie in user.watched_list:
-    #     user.commented_movies.append({
-    #         "movie": movie,
-    #         "comment": movie["comments"][0]
-    #     })
-    #     count += 1
-    #     if count == 10:
-    #         break
-    #
-    # genres = {}
-    # for movie in user.watched_list:
-    #     for genre in movie["genre"]:
-    #         if genre not in genres.keys():
-    #             genres[genre] = 1
-    #         else:
-    #             genres[genre] += 1
-    #
-    # user.favorite_genres = dict(sorted(genres.items(), key=lambda x:x[1], reverse=True))
-    # user.last_activities = [
-    #     {
-    #         "action": "review",
-    #         "review_id": "...",
-    #         "movie": {
-    #             "id": "657b2245d448da2cface22ea",
-    #             "title": "The Godfather",
-    #         },
-    #         "date": datetime.date(2024, 1, 4)
-    #     },
-    #     {
-    #         "action": "liked",
-    #         "movie": {
-    #             "id": "657b2245d448da2cface22ea",
-    #             "title": "The Godfather",
-    #
-    #         },
-    #         "date": datetime.date(2024, 1, 4)
-    #     },
-    #     {
-    #         "action": "watched",
-    #         "movie": {
-    #             "id": "657b2245d448da2cface22ea",
-    #             "title": "The Godfather",
-    #         },
-    #         "date": datetime.date(2024, 1, 4)
-    #     }
-    # ]
+    filter = ""
+    if 'last_activities_filter' in request.GET:
+        filter = {"last_activities_filter": request.GET.get('last_activities_filter')}
+    if 'favorite_genres_filter' in request.GET:
+        filter = {"favorite_genres_filter": request.GET.get('favorite_genres_filter')}
+    if 'watched_list_filter' in request.GET:
+        filter = {"watched_list_filter": request.GET.get('watched_list_filter')}
 
-    return render(request, 'user_page.html', {'user': user})
+
+    return render(request, 'user_page.html', {'user': user, 'filter': filter})
 
 
 
@@ -226,69 +192,23 @@ def get_user_profile(request):
 
     user = LoggedUser(user=request.session.get('user'))
 
-    user.get_watched_list()
-    user.get_favorites_genres()
-    print(user.favorite_genres)
+    user.get_watched_list(request.GET.get('watched_list_filter')) if 'watched_list_filter' in request.GET else user.get_watched_list()
+    user.get_favorites_genres(request.GET.get('favorite_genres_filter')) if 'favorite_genres_filter' in request.GET else user.get_favorites_genres()
+    user.get_liked_movies_count()
+    user.get_disliked_movies_count()
+    user.get_reviews_count()
+    user.get_last_activities(request.GET.get('last_activities_filter')) if 'last_activities_filter' in request.GET else user.get_last_activities()
 
-    # count = 0
-    # user.commented_movies = []
-    # for movie in user.watched_list:
-    #     user.commented_movies.append({
-    #         "movie": movie,
-    #         "comment": movie["comments"][0]
-    #     })
-    #     count += 1
-    #     if count == 10:
-    #         break
-    #
-    # genres_count = {}
-    # for movie in user.watched_list:
-    #     for genre in movie["genre"]:
-    #         if genre not in genres_count.keys():
-    #             genres_count[genre] = 1
-    #         else:
-    #             genres_count[genre] += 1
-    #
-    # user.favorite_genres = dict(sorted(genres_count.items(), key=lambda x: x[1], reverse=True))
-    # user.last_activities = [
-    #     {
-    #         "action": "review",
-    #         "review_id": "...",
-    #         "movie": {
-    #             "id": "657b2245d448da2cface22ea",
-    #             "title": "The Godfather",
-    #         },
-    #         "date": datetime.date(2024, 1, 4)
-    #     },
-    #     {
-    #         "action": "liked",
-    #         "movie": {
-    #             "id": "657b2245d448da2cface22ea",
-    #             "title": "The Godfather",
-    #
-    #         },
-    #         "date": datetime.date(2024, 1, 4)
-    #     },
-    #     {
-    #         "action": "watched",
-    #         "movie": {
-    #             "id": "657b2245d448da2cface22ea",
-    #             "title": "The Godfather",
-    #         },
-    #         "date": datetime.date(2024, 1, 4)
-    #     }
-    # ]
+    filter = ""
+    if 'last_activities_filter' in request.GET:
+        filter = {"last_activities_filter": request.GET.get('last_activities_filter')}
+    if 'favorite_genres_filter' in request.GET:
+        filter = {"favorite_genres_filter": request.GET.get('favorite_genres_filter')}
+    if 'watched_list_filter' in request.GET:
+        filter = {"watched_list_filter": request.GET.get('watched_list_filter')}
 
-    return render(request, 'user_profile.html', {"user": user, "genres": genres})
 
-@require_http_methods(["POST"])
-def update_preferences(request):
-    preferences = [request.POST.get('preference_1'), request.POST.get('preference_2'), request.POST.get('preference_3')]
-
-    user = LoggedUser(user=request.session.get('user'))
-    user.set_preferences(preferences)
-
-    return redirect('get_user_profile')
+    return render(request, 'user_profile.html', {"user": user, "genres": genres, "filter": filter})
 
 
 @require_http_methods(["POST"])

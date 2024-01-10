@@ -13,12 +13,12 @@ graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsm
 
 
 class LoggedUser(User):
-    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, preferences=None, creation_date=None, admin=None):
+    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, creation_date=None, admin=None):
         if user is not None:
             User.__init__(self, user=user)
             self.admin = user['admin'] if 'admin' in user else False
         else:
-            User.__init__(self, first_name=first_name, last_name=last_name, email=email, password=password, profile_pic_path=profile_pic_path, id=id, preferences=preferences, creation_date=creation_date)
+            User.__init__(self, first_name=first_name, last_name=last_name, email=email, password=password, profile_pic_path=profile_pic_path, id=id, creation_date=creation_date)
             self.admin = admin
 
     def to_json(self):
@@ -28,12 +28,11 @@ class LoggedUser(User):
             'last_name': self.last_name,
             'email': self.email,
             'password': self.password,
-            'preferences': self.preferences,
             'profile_pic_path': self.profile_pic_path,
             'creation_date': self.creation_date.strftime('%Y/%m/%d'),
         }
 
-    def update_multiple_fields(self, id, first_name=None, last_name=None, email=None, password=None, preferences=None):
+    def update_multiple_fields(self, id, first_name=None, last_name=None, email=None, password=None):
         fields = {}
         fields['id'] = ObjectId(id)
         if first_name:
@@ -44,8 +43,6 @@ class LoggedUser(User):
             fields['email'] = email
         if password:
             fields['password'] = password
-        if preferences:
-            fields['preferences'] = preferences
 
         try:
             user_collection.updateOne({fields})
@@ -68,14 +65,6 @@ class LoggedUser(User):
             print("Error updating user. Error : ", e)
         else:
             self.password = password
-
-    def set_preferences(self, preferences):
-        try:
-            user_collection.update_one({'_id': ObjectId(self.id)}, {"$set": {'preferences': preferences}})
-        except Exception as e:
-            print("Error updating user. Error : ", e)
-        else:
-            self.preferences = preferences
 
     def see_movie(self, movie_id):
         query = "MATCH (u:User {id: $user_id}), (m:Movie {id: $movie_id}) CREATE (u)-[:SEEN {date:$date}]->(m) RETURN exists((u)-[:SEEN]->(m))"
