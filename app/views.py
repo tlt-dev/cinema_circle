@@ -21,7 +21,7 @@ document_db = client['cinema_circle']
 movie_collection = document_db['movie']
 user_collection = document_db['user']
 
-graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsmdb_2024"))
+graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsmdb_2024"), database="cinemacircle")
 
 graph_driver.verify_connectivity()
 
@@ -29,6 +29,12 @@ graph_driver.verify_connectivity()
 def index(request):
     return render(request, 'index.html')
 
+
+def all_movies(request):
+    movies = list(movie_collection.find().sort({"_id": -1}).limit(10000))
+    print(movies[0])
+
+    return render(request, 'all.html',{'movies':movies})
 
 @require_http_methods(['GET'])
 def register_page(request):
@@ -118,16 +124,12 @@ def recommendations(request):
 
 def movie_details(request, id):
     movie = movie_collection.find_one({'_id': ObjectId(id)})
+    movie['comments'] = sorted(movie['comments'], key=lambda x: x['date'], reverse=True)
 
     logged_user = LoggedUser(user=request.session['user'])
 
-    records, summary, keys = graph_driver.execute_query(
-        "MATCH (lu:User)-[:SEEN]->(m:Movie) WHERE lu.id = '{}' and m.id = '{}' RETURN lu".format(logged_user.id, str(id)),
-        database_="cinemacircle",
-    )
-
-    for record in records:
-        print(record)
+    request.session['user']['has_seen_movie'] = logged_user.has_seen_movie(id)
+    request.session['user']['has_liked_movie'] = logged_user.has_liked_movie(id)
 
     return render(request, 'movie_details.html', {'movie': movie})
 
@@ -190,8 +192,6 @@ def get_user(request, id):
     return render(request, 'user_page.html', {'user': user})
 
 
-def add_review(request, id):
-    pass
 
 
 def get_recommanded_users(request):
@@ -287,3 +287,46 @@ def update_preferences(request):
     user.set_preferences(preferences)
 
     return redirect('get_user_profile')
+
+
+@require_http_methods(["POST"])
+def mark_movie_as_seen(request, id):
+    user = LoggedUser(user=request.session.get('user'))
+    if user.see_movie(id):
+        return HttpResponse(json.dumps({'message': 'Movie mark as seen'}))
+    else:
+        return HttpResponse(status=404)
+
+
+@require_http_methods(["POST"])
+def like_movie(request, id, value):
+    user = LoggedUser(user=request.session.get('user'))
+    if user.like_movie(id, value):
+        return HttpResponse(json.dumps({'value': value}))
+    else:
+        return HttpResponse(status=404)
+
+
+@require_http_methods(['POST'])
+def add_review(request, id):
+    user = LoggedUser(user=request.session['user'])
+
+    comment = {
+        'title': request.POST.get('title'),
+        'date': datetime.datetime.now(),
+        'content': request.POST.get('content'),
+        'user': {
+            'id': user.id,
+            'lastName': user.last_name,
+            'firtName': user.first_name
+        }
+    }
+
+    try:
+        movie_collection.update_one({'_id': ObjectId(id)}, {'$push': {'comments': comment}})
+    except Exception as e:
+        print('Error in updating movie comments. Error : ', e)
+    else:
+        user.add_review(id)
+
+    return redirect('movie_details', id=id)

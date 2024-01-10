@@ -9,7 +9,7 @@ client = pymongo.MongoClient(host="localhost", port=27017, username=None, passwo
 document_db = client['cinema_circle']
 user_collection = document_db['user']
 
-graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsmdb_2024"))
+graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsmdb_2024"), database="cinemacircle")
 
 
 class User:
@@ -33,6 +33,8 @@ class User:
             self.creation_date = creation_date
         self.watched_list = None
         self.reviews_count = None
+        self.liked_movies_count = None
+        self.disliked_movies_count = None
         self.favorite_genres = None
         self.last_activities = None
 
@@ -143,7 +145,6 @@ class User:
 
         self.watched_list = [record.data()['m'] for record in records]
 
-
     def get_reviews_count(self):
         pass
 
@@ -152,4 +153,12 @@ class User:
 
     def get_favorites_genres(self):
         pass
+
+    def get_liked_movies_count(self):
+        pass
+
+    def get_disliked_movies_count(self):
+        pass
+
+
 

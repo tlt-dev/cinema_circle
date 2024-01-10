@@ -1,7 +1,9 @@
 {% extends "Base.html" %}
+{% load app_tags %}
 {% load static %}
 
 {% block content %}
+    {% csrf_token %}
     <div class="container-fluid">
         <div class="container-fluid">
             {% include 'Navbar.html' %}
@@ -62,22 +64,83 @@
                         <hr>
                         <div class="row">
                             <div class="col-4">
-                                <button class="btn btn-outline-success text-white"><i class="bi bi-play-circle"
-                                                                                      style="font-size: 1.25rem"></i>
+                                <button class="btn btn-outline-success text-white d-none"
+                                        name="btn_mark_movie_watched"
+                                        onclick="mark_movie_as_seen('{{ movie|mongo_id }}')"><i
+                                        class="bi bi-play-circle"
+                                        style="font-size: 1.25rem"></i>
                                     Mark as watched
                                 </button>
+                                <button class="btn btn-outline-success text-success d-none"
+                                        name="btn_movie_watched" disabled><i
+                                        class="bi bi-check-circle-fill" style="font-size: 1.25rem"></i>
+                                    Movie watched
+                                </button>
+                                {% if request.session.user.has_seen_movie != None %}
+                                    <button class="btn btn-outline-success text-success"
+                                            name="btn_movie_watched" disabled><i
+                                            class="bi bi-check-circle-fill" style="font-size: 1.25rem"></i>
+                                        Movie watched
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-outline-success text-white"
+                                            name="btn_mark_movie_watched"
+                                            onclick="mark_movie_as_seen('{{ movie|mongo_id }}')"><i
+                                            class="bi bi-play-circle"
+                                            style="font-size: 1.25rem"></i>
+                                        Mark as watched
+                                    </button>
+                                {% endif %}
                             </div>
-                            <div class="col-2">
-                                <button class="btn btn-outline-danger text-white"><i class="bi bi-heart"
-                                                                                     style="font-size: 1.25rem"></i>
+                            <div class="col-3">
+                                <button class="btn btn-outline-danger text-white d-none" name="btn_liked" disabled><i
+                                        class="bi bi-heart-fill"
+                                        style="font-size: 1.25rem"></i>
+                                    Liked
+                                </button>
+                                <button class="btn btn-outline-danger text-white d-none" name="btn_like"
+                                        onclick="like_movie('{{ movie|mongo_id }}', 1)"><i class="bi bi-heart"
+                                                                                           style="font-size: 1.25rem"></i>
                                     Like
                                 </button>
+                                {% if request.session.user.has_liked_movie == 1 %}
+                                    <button class="btn btn-outline-danger text-white" name="btn_liked" disabled><i
+                                            class="bi bi-heart-fill"
+                                            style="font-size: 1.25rem"></i>
+                                        Liked
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-outline-danger text-white" name="btn_like"
+                                            onclick="like_movie('{{ movie|mongo_id }}', 1)"><i class="bi bi-heart"
+                                                                                               style="font-size: 1.25rem"></i>
+                                        Like
+                                    </button>
+                                {% endif %}
                             </div>
-                            <div class="col-2">
-                                <button class="btn btn-outline-info text-white"><i class="bi bi-heart-fill"
-                                                                                   style="font-size: 1.25rem"></i>
+                            <div class="col-3">
+                                <button class="btn btn-outline-info text-white d-none" name="btn_disliked" disabled><i
+                                        class="bi bi-heartbreak-fill"
+                                        style="font-size: 1.15rem"></i>
+                                    Disliked
+                                </button>
+                                <button class="btn btn-outline-info text-white d-none" name="btn_dislike"
+                                        onclick="like_movie('{{ movie|mongo_id }}', 0)"><i class="bi bi-heartbreak"
+                                                                                           style="font-size: 1.25rem"></i>
                                     Dislike
                                 </button>
+                                {% if request.session.user.has_liked_movie == 0 %}
+                                    <button class="btn btn-outline-info text-white" name="btn_disliked" disabled><i
+                                            class="bi bi-heartbreak-fill"
+                                            style="font-size: 1.15rem"></i>
+                                        Disliked
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-outline-info text-white" name="btn_dislike"
+                                            onclick="like_movie('{{ movie|mongo_id }}', 0)"><i class="bi bi-heartbreak"
+                                                                                               style="font-size: 1.25rem"></i>
+                                        Dislike
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -91,7 +154,8 @@
                                 </h4>
                                 <span class="text-muted">{{ comment.date }}</span>
                                 <p class="mt-2">
-                                    {{ comment.content }} - <a href="{% url 'view_user_page' comment.user.id %}">{{ comment.user.firstName }} {{ comment.user.lastName }}</a>
+                                    {{ comment.content }} - <a
+                                        href="{% url 'view_user_page' comment.user.id %}">{{ comment.user.firstName }} {{ comment.user.lastName }}</a>
                                 </p>
                                 <hr>
                             </div>
@@ -111,7 +175,8 @@
                                         aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="{% url 'add_review' '123' %}">
+                                <form method="POST" action="{% url 'add_review' movie|mongo_id %}">
+                                    {% csrf_token %}
                                     <div class="row justify-content-center">
                                         <div class="col-10">
                                             <input type="text" name="title" class="form-control bg-dark"
@@ -120,7 +185,7 @@
                                     </div>
                                     <div class="row mt-3 justify-content-center">
                                         <div class="col-10">
-                                            <textarea name="title" rows="10" class="form-control bg-dark"></textarea>
+                                            <textarea name="content" rows="10" class="form-control bg-dark"></textarea>
                                         </div>
                                     </div>
                                     <div class="row mt-3 justify-content-center">

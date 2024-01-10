@@ -1,6 +1,7 @@
 from objects.User import User
 from bson import ObjectId, json_util
 from neo4j import GraphDatabase
+from datetime import datetime
 
 import pymongo
 
@@ -8,7 +9,7 @@ client = pymongo.MongoClient(host="localhost", port=27017, username=None, passwo
 document_db = client['cinema_circle']
 user_collection = document_db['user']
 
-graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsmdb_2024"))
+graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsmdb_2024"), database="cinemacircle")
 
 
 class LoggedUser(User):
@@ -76,24 +77,56 @@ class LoggedUser(User):
         else:
             self.preferences = preferences
 
-    def see_movie(self, movie_id, value):
-        pass
+    def see_movie(self, movie_id):
+        query = "MATCH (u:User {id: $user_id}), (m:Movie {id: $movie_id}) CREATE (u)-[:SEEN]->(m) RETURN exists((u)-[:SEEN]->(m))"
+
+        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id)
+
+        return records[0]
 
     def like_movie(self, movie_id, value):
-        pass
 
-    def add_review(self, movie_id, title, comment):
-        pass
+        query = "MATCH (u:User {id: $user_id}), (m:Movie {id: $movie_id}) RETURN exists((u)-[:LIKED]->(m)) as relation_exist"
+
+        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id)
+
+        if records[0].data()['relation_exist']:
+            # if LIKED relationship already exists, edit it
+            query = "MATCH (u:User {id: $user_id})-[r:LIKED]->(m:Movie {id: $movie_id}) SET r.like=$value, r.date=$date RETURN exists((u)-[:LIKED {like: $value}]->(m)) as return_value"
+        else:
+            query = "MATCH (u:User {id: $user_id}), (m:Movie {id: $movie_id}) CREATE (u)-[:LIKED {like:$value, date:$date}]->(m) RETURN exists((u)-[:LIKED]->(m)) as return_value"
+
+        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id, value=value, date=datetime.today())
+
+        return records[0].data()['return_value']
+
+    def add_review(self, movie_id):
+        query = "MATCH (u:User {id: $user_id}), (m:Movie {id: $movie_id}) CREATE (u)-[:REVIEWED {date:$date}]->(m) RETURN exists((u)-[:REVIEWED]->(m)) as return_value"
+
+        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id, date=datetime.today())
+
+        return records[0].data()['return_value']
 
     def has_seen_movie(self, movie_id):
-        pass
+        query = "OPTIONAL MATCH (u:User {id: $user_id})-[r:SEEN]->(m:Movie {id: $movie_id}) RETURN CASE WHEN r IS NOT NULL THEN r ELSE NULL END as return_value"
+
+        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id)
+
+        return records[0].data()['return_value']
 
     def has_liked_movie(self, movie_id):
-        "if liked = True / if disliked = False / else None"
-        pass
+        query = "OPTIONAL MATCH (u:User {id: $user_id})-[r:LIKED]->(m:Movie {id: $movie_id}) RETURN CASE WHEN r IS NOT NULL THEN r.like ELSE NULL END as return_value"
+
+        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id)
+
+        return records[0].data()['return_value']
 
     def has_reviewed_movie(self, movie_id):
-        pass
+        query = "OPTIONAL MATCH (u:User {id: $user_id})-[r:REVIEWED]->(m:Movie {id: $movie_id}) RETURN CASE WHEN r IS NOT NULL THEN r ELSE NULL END as return_value"
+
+        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id)
+
+        return records[0].data()['return_value']
 
 
 
