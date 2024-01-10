@@ -5,7 +5,7 @@ import pymongo
 from neo4j import GraphDatabase
 
 
-client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
+client = pymongo.MongoClient(host="localhost", port=27018, username=None, password=None)
 document_db = client['cinema_circle']
 user_collection = document_db['user']
 
@@ -195,7 +195,7 @@ class User:
         for record in records:
             self.favorite_genres.append({'genre': record.data()['Genre']['name'], 'score': record['totalScore']})
 
-
+            
     def get_liked_movies_count(self):
         query = "MATCH (u:User {id: $id})-[r:LIKED {like: 1}]->() RETURN count(r) as result"
 
