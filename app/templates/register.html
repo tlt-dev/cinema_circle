@@ -49,42 +49,6 @@
                     <label for="floatingInput" class="text-black">Password</label>
                 </div>
 
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text bg-secondary text-white">Preference 1</div>
-                    </div>
-                    <select class="form-control bg-dark text-white" name="preference_1" required>
-                        <option value="">--- Select a genre ---</option>
-                        {% for genre in genres %}
-                            <option value="{{ genre }}">{{ genre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text bg-secondary text-white">Preference 2</div>
-                    </div>
-                    <select class="form-control bg-dark text-white" name="preference_2" required>
-                        <option value="">--- Select a genre ---</option>
-                        {% for genre in genres %}
-                            <option value="{{ genre }}">{{ genre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text bg-secondary text-white">Preference 3</div>
-                    </div>
-                    <select class="form-control bg-dark text-white" name="preference_3" required>
-                        <option value="">--- Select a genre ---</option>
-                        {% for genre in genres %}
-                            <option value="{{ genre }}">{{ genre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
                 <div class="d-grid gap-2">
                     <button class="btn btn-danger" type="submit">Register</button>
                 </div>

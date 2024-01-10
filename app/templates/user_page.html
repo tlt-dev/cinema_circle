@@ -49,27 +49,44 @@
                             Activities
                         </button>
                     </li>
-                    <li class="ms-auto" role="presentation">
-                        <span class="text-secondary">Filter by : </span>
-                        <select class="bg-dark text-white">
-                            <option>Name</option>
-                            <option>Date</option>
-                        </select>
-                    </li>
                 </ul>
                 <div class="tab-content" id="userTabContent"
                      style="overflow-y: auto; overflow-x: hidden; max-height: 80vh">
                     <div class="tab-pane fade show active" id="watched" role="tabpanel" aria-labelledby="watched-tab">
+                        <div class="row my-2">
+                            <div class="col">
+                                <form method="GET" action="{% url 'view_user_page' user.id %}">
+                                    <span class="text-secondary">Since : </span>
+                                    <select class="bg-dark text-white" name="watched_list_filter"
+                                            onchange="this.form.submit()">
+                                        <option value="date_desc" selected>Watch Date DESC</option>
+                                        <option value="date_asc"
+                                                {% if filter.watched_list_filter == "date_asc" %}selected{% endif %}>
+                                            Watch Date ASC
+                                        </option>
+                                        <option value="title_asc"
+                                                {% if filter.watched_list_filter == "title_asc" %}selected{% endif %}>
+                                            Title ASC
+                                        </option>
+                                        <option value="title_desc"
+                                                {% if filter.watched_list_filter == "title_desc" %}selected{% endif %}>
+                                            Title DESC
+                                        </option>
+                                    </select>
+                                </form>
+                            </div>
+                            <hr class="my-2">
+                        </div>
                         <div class="row mt-3 ms-3">
                             {% for movie in user.watched_list %}
                                 <div class="col-3 mt-2">
                                     <div class="row">
                                         {% if not movie.poster_path %}
                                             <img src="{% static 'assets/img/default_poster.jpg' %}"
-                                             style="width: 150px; height: 190px">
+                                                 style="width: 150px; height: 190px">
                                         {% else %}
-                                        <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}"
-                                             style="width: 150px">
+                                            <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}"
+                                                 style="width: 150px">
                                         {% endif %}
 
                                     </div>
@@ -83,35 +100,84 @@
 
                     </div>
                     <div class="tab-pane fade" id="genres" role="tabpanel" aria-labelledby="genres-tab">
+                        <div class="row my-2">
+                            <div class="col">
+                                <form method="GET" action="{% url 'view_user_page' user.id %}">
+                                    <span class="text-secondary">Order by : </span>
+                                    <select class="bg-dark text-white" name="favorite_genres_filter"
+                                            onchange="this.form.submit()">
+                                        <option value="score_desc" selected>Score DESC</option>
+                                        <option value="score_asc"
+                                                {% if filter.favorite_genres_filter == "score_asc" %}selected{% endif %}>
+                                            Score ASC
+                                        </option>
+                                        <option value="name_asc"
+                                                {% if filter.favorite_genres_filter == "name_asc" %}selected{% endif %}>
+                                            Name ASC
+                                        </option>
+                                        <option value="name_desc"
+                                                {% if filter.favorite_genres_filter == "name_desc" %}selected{% endif %}>
+                                            Name DESC
+                                        </option>
+                                    </select>
+                                </form>
+                            </div>
+                            <hr class="my-2">
+                        </div>
                         <div class="row mt-3">
-                            {% for genre, nb_movies in user.favorites_genres.items %}
-                                <h2>{{ forloop.counter }} - <small style="font-size: 2rem">{{ genre }} </small><small
+                            {% for genre in user.favorite_genres %}
+                                <h2>{{ forloop.counter }} - <small
+                                        style="font-size: 2rem">{{ genre.genre }} </small><small
                                         class="text-muted"
-                                        style="font-size: 1.5rem ">({{ nb_movies }}
-                                    movies watched)</small></h2>
+                                        style="font-size: 1.5rem ">(Score : {{ genre.score }})</small></h2>
                                 <hr>
                             {% endfor %}
                         </div>
                     </div>
                     <div class="tab-pane fade" id="activities" role="tabpanel" aria-labelledby="activities-tab">
+                        <div class="row my-2">
+                            <div class="col">
+                                <form method="GET" action="{% url 'view_user_page' user.id %}">
+                                    <span class="text-secondary">Since : </span>
+                                    <select class="bg-dark text-white" name="last_activities_filter"
+                                            onchange="this.form.submit()">
+                                        <option value="P15D" selected>15 days</option>
+                                        <option value="P1M"
+                                                {% if filter.last_activities_filter == "P1M" %}selected{% endif %}>1
+                                            month
+                                        </option>
+                                        <option value="P3M"
+                                                {% if filter.last_activities_filter == "P3M" %}selected{% endif %}>3
+                                            months
+                                        </option>
+                                        <option value="P6M"
+                                                {% if filter.last_activities_filter == "P6M" %}selected{% endif %}>6
+                                            months
+                                        </option>
+                                        <option value="all"
+                                                {% if filter.last_activities_filter == "all" %}selected{% endif %}>All
+                                            time
+                                        </option>
+                                    </select>
+                                </form>
+                            </div>
+                            <hr class="my-2">
+                        </div>
+                        {% if not user.last_activities %}
+                            <div class="row mt-2">
+                                <div class="col-9">
+                                    <p class="text-secondary">No activities to show on that period.</p>
+                                </div>
+                            </div>
+                        {% endif %}
                         {% for activity in user.last_activities %}
                             <div class="row mt-2">
                                 <div class="col-9">
-                                    {% if activity.action == "review" %}
-                                        <p class="text-secondary"><span
-                                                class="text-white">{{ user.first_name }} {{ user.last_name }}</span> has
-                                            posted
-                                            a <a class="text-white" href="{{ activity.review_id }}"><u>review</u></a>
-                                            to <a href="{% url 'movie_details' activity.movie.id %}"
-                                                  class="text-white"><u>{{ activity.movie.title }}</u></a></p>
-
-                                    {% else %}
-                                        <p class="text-secondary"><span
-                                                class="text-white">{{ user.first_name }} {{ user.last_name }}</span> has
-                                            {{ activity.action }} <a
-                                                    href="{% url 'movie_details' activity.movie.id %}"
-                                                    class="text-white"><u>{{ activity.movie.title }}</u></a></p>
-                                    {% endif %}
+                                    <p class="text-secondary"><span
+                                            class="text-white">{{ user.first_name }} {{ user.last_name }}</span> has
+                                        {{ activity.action }} <a
+                                                href="{% url 'movie_details' activity.movie_id %}"
+                                                class="text-white"><u>{{ activity.movie_title }}</u></a></p>
                                 </div>
                                 <div class="col-2">
                                     <p>{{ activity.date }}</p>
@@ -129,15 +195,15 @@
                         <p>Movies seen</p>
                     </div>
                     <div class="col-10 mt-3 bg-dark rounded mx-auto align-middle py-3" style="height:min-content">
-                        <h2>{{ user.liked_movies_count|length }}</h2>
+                        <h2>{{ user.liked_movies_count }}</h2>
                         <p>Movies liked</p>
                     </div>
                     <div class="col-10 mt-3 bg-dark rounded mx-auto align-middle py-3" style="height:min-content">
-                        <h2>{{ user.disliked_movies_count|length }}</h2>
+                        <h2>{{ user.disliked_movies_count }}</h2>
                         <p>Movies disliked</p>
                     </div>
                     <div class="col-10 mt-3 bg-dark rounded mx-auto align-middle py-3" style="height:min-content">
-                        <h2>{{ user.reviews_count|length }}</h2>
+                        <h2>{{ user.reviews_count }}</h2>
                         <p>Reviews count</p>
                     </div>
                 </div>
