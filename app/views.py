@@ -227,6 +227,8 @@ def get_user_profile(request):
     user = LoggedUser(user=request.session.get('user'))
 
     user.get_watched_list()
+    user.get_favorites_genres()
+    print(user.favorite_genres)
 
     # count = 0
     # user.commented_movies = []

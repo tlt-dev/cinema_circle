@@ -13,13 +13,13 @@ graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsm
 
 
 class LoggedUser(User):
-    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, preferences=None):
+    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, preferences=None, creation_date=None, admin=None):
         if user is not None:
             User.__init__(self, user=user)
-            self.preferences = user['preferences'] if 'preferences' in user else None
+            self.admin = user['admin'] if 'admin' in user else False
         else:
-            User.__init__(self, first_name=first_name, last_name=last_name, email=email, password=password, profile_pic_path=profile_pic_path, id=id)
-            self.preferences = preferences
+            User.__init__(self, first_name=first_name, last_name=last_name, email=email, password=password, profile_pic_path=profile_pic_path, id=id, preferences=preferences, creation_date=creation_date)
+            self.admin = admin
 
     def to_json(self):
         return {
