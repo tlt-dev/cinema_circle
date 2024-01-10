@@ -78,9 +78,9 @@ class LoggedUser(User):
             self.preferences = preferences
 
     def see_movie(self, movie_id):
-        query = "MATCH (u:User {id: $user_id}), (m:Movie {id: $movie_id}) CREATE (u)-[:SEEN]->(m) RETURN exists((u)-[:SEEN]->(m))"
+        query = "MATCH (u:User {id: $user_id}), (m:Movie {id: $movie_id}) CREATE (u)-[:SEEN {date:$date}]->(m) RETURN exists((u)-[:SEEN]->(m))"
 
-        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id)
+        records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id, date=datetime.today())
 
         return records[0]
 
