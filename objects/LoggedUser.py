@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pymongo
 
-client = pymongo.MongoClient(host="localhost", port=27018, username=None, password=None)
+client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
 document_db = client['cinema_circle']
 user_collection = document_db['user']
 
@@ -30,6 +30,7 @@ class LoggedUser(User):
             'password': self.password,
             'profile_pic_path': self.profile_pic_path,
             'creation_date': self.creation_date.strftime('%Y/%m/%d'),
+            'admin': self.admin
         }
 
     def update_multiple_fields(self, id, first_name=None, last_name=None, email=None, password=None):
@@ -241,3 +242,21 @@ class LoggedUser(User):
         for i in range(len(movies)):
             movies[i]["_id"] =  movies[i].pop("id")
         return movies
+
+    def follow_user(self, user_id, value):
+        if value == 1:
+            query = "MATCH (lu:User {id: $logged_user_id}), (u:User {id: $user_id}) CREATE (lu)-[:FOLLOWS {date:$date}]->(u) RETURN exists((lu)-[:FOLLOWS]->(u)) as return_value"
+            records, summary, keys = graph_driver.execute_query(query, logged_user_id=self.id, user_id=user_id,
+                                                                date=datetime.today())
+        else:
+            query = "MATCH (lu:User {id: $logged_user_id})-[r:FOLLOWS]->(u:User {id: $user_id}) DELETE r RETURN exists((lu)-[:FOLLOWS]->(u)) as return_value"
+            records, summary, keys = graph_driver.execute_query(query, logged_user_id=self.id, user_id=user_id)
+
+        return records[0].data()['return_value']
+
+    def is_following(self, id):
+        query = "RETURN EXISTS((:User {id: $logged_user_id})-[:FOLLOWS]->(:User {id: $user_id})) as is_following"
+
+        records, summary, keys = graph_driver.execute_query(query, logged_user_id=self.id, user_id=id)
+
+        return records[0].data()['is_following']

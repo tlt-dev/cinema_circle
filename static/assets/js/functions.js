@@ -39,4 +39,24 @@ function like_movie(movie_id, value) {
 
 }
 
+function follow_user(id, value){
+
+    $.ajax({
+      url: '/cinema_circle/user/' + id + '/follow/' + value,
+      type: 'POST',
+      dataType: 'JSON',
+      headers: {'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()}
+    }).done(function(response){
+        if(response.value == 1){
+            $("#btn_unfollow").removeClass('d-none');
+            $("#btn_follow").addClass('d-none');
+        } else {
+            $("#btn_unfollow").addClass('d-none');
+            $("#btn_follow").removeClass('d-none');
+        }
+
+    })
+
+}
+
 
