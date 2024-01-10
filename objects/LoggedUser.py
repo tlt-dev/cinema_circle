@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pymongo
 
-client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
+client = pymongo.MongoClient(host="localhost", port=27018, username=None, password=None)
 document_db = client['cinema_circle']
 user_collection = document_db['user']
 
@@ -127,6 +127,31 @@ class LoggedUser(User):
         records, summary, keys = graph_driver.execute_query(query, user_id=self.id, movie_id=movie_id)
 
         return records[0].data()['return_value']
+    
+    def get_recommended_movie_from_genre(self, genre):
+        followed_user_movies = self.get_followed_user_movies()
 
-
+    def get_followed_user_movies(self):
+        query = """
+            MATCH (user:User {id:$id})-[:FOLLOWS]->(followed:User)
+            MATCH (followed)-[seen:SEEN]->(movie:Movie)
+            OPTIONAL MATCH (followed)-[liked:LIKED]->(movie) WHERE liked.like <> 0
+            MATCH (movie)-[:TYPE_OF]->(genre:Genre)
+            RETURN followed AS FollowedUser, 
+            COLLECT(DISTINCT {movie: movie, seen: date(seen.date), liked: liked.like, genre: genre.name}) AS Movies
+        """
+        records, summary, keys = graph_driver.execute_query(query, id=self.id)
+    
+        result = {}
+        for record in records:
+            movies_dict = []
+            for movies in record.data()['Movies']:
+                movies_dict.append({
+                    "genre" : movies["genre"],
+                    "liked" : movies["liked"],
+                    "movie" : movies["movie"],
+                    "seen" : movies["seen"].iso_format()
+                })
+            result[record.data()['FollowedUser']["id"]] = movies_dict
+        return result
 

@@ -5,7 +5,7 @@ import pymongo
 from neo4j import GraphDatabase
 
 
-client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
+client = pymongo.MongoClient(host="localhost", port=27018, username=None, password=None)
 document_db = client['cinema_circle']
 user_collection = document_db['user']
 
@@ -152,7 +152,54 @@ class User:
         pass
 
     def get_favorites_genres(self):
-        pass
+        query = """
+                MATCH (user:User {id: $id})-[r:LIKED|REVIEWED|SEEN]->(m:Movie)-[:TYPE_OF]->(g:Genre)
+                WITH user, g, r, m,
+                    CASE 
+                    WHEN r:SEEN THEN 
+                        CASE
+                        WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 4
+                        WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 3
+                        WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 2
+                        ELSE 1
+                        END
+                    WHEN r:LIKED AND r.like = 0 THEN 
+                        CASE
+                        WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 7
+                        WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 5
+                        WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 2
+                        ELSE 3
+                        END
+                    WHEN r:REVIEWED AND r.like = 0 THEN 
+                        CASE
+                        WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 15
+                        WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 12
+                        WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 9
+                        ELSE 6
+                        END
+                    WHEN r:LIKED AND r.like = -1 THEN 
+                        CASE
+                        WHEN datetime(r.date) >= datetime() - duration('P3D') THEN -7
+                        WHEN datetime( r.date) >= datetime() - duration('P1W') THEN -5
+                        WHEN datetime(r.date) >= datetime() - duration('P2W') THEN -2
+                        ELSE -3
+                        END
+                    WHEN r:REVIEWED AND r.like = -1 THEN 
+                        CASE
+                        WHEN datetime(r.date) >= datetime() - duration('P3D') THEN -15
+                        WHEN datetime(r.date) >= datetime() - duration('P1W') THEN -12
+                        WHEN datetime(r.date) >= datetime() - duration('P2W') THEN -9
+                        ELSE -6
+                        END
+                    END AS score
+                WITH g, SUM(score) + 100 AS totalScore
+                RETURN g AS Genre, totalScore
+                ORDER BY totalScore DESC
+                LIMIT 3
+            """
+        records, summary, keys = graph_driver.execute_query(query, id=self.id, database="cinemacircle")
+
+        self.favorite_genres = [record.data()['Genre'] for record in records]
 
     def get_liked_movies_count(self):
         pass

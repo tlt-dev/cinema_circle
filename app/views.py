@@ -16,7 +16,7 @@ from neo4j import GraphDatabase
 import logging
 logger = logging.getLogger("mylogger")
 
-client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
+client = pymongo.MongoClient(host="localhost", port=27018, username=None, password=None)
 document_db = client['cinema_circle']
 movie_collection = document_db['movie']
 user_collection = document_db['user']
@@ -88,23 +88,22 @@ def logout(request):
 
 
 def recommendations(request):
+    logged_user = LoggedUser(user=request.session['user'])
+
     recommandations = [
         {
             "category_title": "Popular movies",
             "movie_list": list(movie_collection.find().limit(6))
-        },
-        {
-            "category_title": "Western (from your preferences)",
-            "movie_list": list(movie_collection.find().limit(12))[-6:]
-        },
-        {
-            "category_title": "Thriller (from your preferences)",
-            "movie_list": list(movie_collection.find().limit(18))[-6:]
-        },
-        {
-            "category_title": "Horror (from your preferences)",
-            "movie_list": list(movie_collection.find().limit(24))[-6:]
-        },
+        }]
+    
+    logged_user.get_favorites_genres()
+    
+    for genre in logged_user.favorite_genres:
+            recommandations.append({"category_title":"Because you like " + genre["name"] + " movies", 
+                                    "movie_list": logged_user.get_recommended_movie_from_genre(genre["name"])})
+
+
+    """
         {
             "category_title": "Because you liked The Godfather",
             "movie_list": list(movie_collection.find().limit(30))[-6:]
@@ -118,6 +117,7 @@ def recommendations(request):
             "movie_list": list(movie_collection.find().limit(42))[-6:]
         }
         ]
+        """
 
     return render(request, 'movie_recommandations.html', {'recommandations': recommandations})
 
