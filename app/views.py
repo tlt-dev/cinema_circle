@@ -91,11 +91,13 @@ def recommendations(request):
     logged_user = LoggedUser(user=request.session['user'])
 
     displayed_movies = list()
+    to_display = logged_user.get_popular_movies()
     recommandations = [
         {
             "category_title": "Popular movies",
-            "movie_list": list(movie_collection.find().limit(6))
+            "movie_list": to_display
         }]
+    displayed_movies += to_display
     logged_user.get_favorites_genres()
     
     for genre in logged_user.favorite_genres[:3]:
@@ -104,21 +106,6 @@ def recommendations(request):
                                     "movie_list": to_display})
         displayed_movies += to_display
 
-    """
-        {
-            "category_title": "Because you liked The Godfather",
-            "movie_list": list(movie_collection.find().limit(30))[-6:]
-        },
-        {
-            "category_title": "Your friends watch",
-            "movie_list": list(movie_collection.find().limit(36))[-6:]
-        },
-        {
-            "category_title": "Because you watched The Godfather",
-            "movie_list": list(movie_collection.find().limit(42))[-6:]
-        }
-        ]
-        """
     return render(request, 'movie_recommandations.html', {'recommandations': recommandations})
 
 

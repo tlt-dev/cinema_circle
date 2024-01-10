@@ -237,4 +237,18 @@ class LoggedUser(User):
             
         return result
 
+    def get_popular_movies(self):
+        query = """
+        MATCH (m:Movie)<-[r:SEEN|LIKED|REVIEWED]-(u:User)
+        WHERE datetime(r.date) >= datetime() - duration('P1M') 
+        WITH m, COUNT(r) AS interactions
+        RETURN m
+        ORDER BY interactions DESC
+        LIMIT 6
+        """
+        records, summary, keys = graph_driver.execute_query(query)
 
+        movies = [record.data()['m'] for record in records]
+        for i in range(len(movies)):
+            movies[i]["_id"] =  movies[i].pop("id")
+        return movies
