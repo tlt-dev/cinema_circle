@@ -5,7 +5,7 @@ import pymongo
 from neo4j import GraphDatabase
 
 
-client = pymongo.MongoClient(host="localhost", port=27018, username=None, password=None)
+client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
 document_db = client['cinema_circle']
 user_collection = document_db['user']
 
@@ -180,8 +180,6 @@ class User:
             else:
                 activity["action"] = record.data()['r'][1].lower()
             self.last_activities.append(activity)
-        print(self.last_activities)
-
 
     def get_favorites_genres(self, filter="score_desc"):
         if filter == "score_desc": order_by = "totalScore DESC"

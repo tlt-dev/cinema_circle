@@ -16,7 +16,7 @@ from neo4j import GraphDatabase
 import logging
 logger = logging.getLogger("mylogger")
 
-client = pymongo.MongoClient(host="localhost", port=27018, username=None, password=None)
+client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
 document_db = client['cinema_circle']
 movie_collection = document_db['movie']
 user_collection = document_db['user']
@@ -49,7 +49,8 @@ def register(request):
         last_name=request.POST.get('last_name'),
         email=request.POST.get('email'),
         password=request.POST.get('password'),
-        profile_pic_path='avatar_' + str(random.randint(1,10)) + '.png'
+        profile_pic_path='avatar_' + str(random.randint(1,10)) + '.png',
+        admin=request.POST.get('admin')
     )
 
     if user.user_exist():
@@ -122,6 +123,9 @@ def movie_details(request, id):
 
 def get_user_page(request, id):
     user = User(user_collection.find_one({'_id': ObjectId(id)}))
+    logged_user = LoggedUser(user=request.session['user'])
+
+    request.session['user']['is_following'] = logged_user.is_following(id)
 
     user.get_watched_list(
         request.GET.get('watched_list_filter')) if 'watched_list_filter' in request.GET else user.get_watched_list()
@@ -193,6 +197,14 @@ def get_user_profile(request):
 
     return render(request, 'user_profile.html', {"user": user, "genres": genres, "filter": filter})
 
+@require_http_methods(["POST"])
+def follow_user(request, id, value):
+    logged_user = LoggedUser(user=request.session.get('user'))
+
+    logged_user.follow_user(id, value)
+
+    return HttpResponse(json.dumps({'value': value}))
+
 
 @require_http_methods(["POST"])
 def mark_movie_as_seen(request, id):
@@ -235,3 +247,8 @@ def add_review(request, id):
         user.add_review(id)
 
     return redirect('movie_details', id=id)
+
+
+
+def admin_page(request):
+    pass
