@@ -1,0 +1,47 @@
+{% extends "Base.html" %}
+{% load app_tags %}
+{% load static %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="container-fluid">
+            {% include 'Navbar.html' %}
+        </div>
+    </div>
+    <div class="container ms-0" style="overflow-y: scroll; overflow-x: scroll; height: 90vh">
+        <div class="row" style="height: 90vh;">
+            <div class="col-3" style="border-right: solid 2px #dd0000">
+                <ul class="nav nav-pills flex-column text-start" id="nav-admin" role="tablist">
+                    <li class="nav-item py-3" role="presentation">
+                        <button class="nav-link active text-start text-white py-3" style="width: 100%" id="pills-user-activity-tab" data-bs-toggle="pill" data-bs-target="#pills-user-activity" type="button" role="tab" aria-controls="pills-user-activity" aria-selected="true"><span class="ms-3">Users activity</span></button>
+                    </li>
+                    <li class="nav-item pt-3" role="presentation">
+                        <button class="nav-link text-start text-white py-3" style="width: 100%" id="pills-movies-statistics-tab" data-bs-toggle="pill" data-bs-target="#pills-movies-statistics" type="button" role="tab" aria-controls="pills-movies-statistics"><span class="ms-3">Movies statistics</span></button>
+                    </li>
+                    <li class="nav-item py-3" role="presentation">
+                        <button class="nav-link text-start text-white py-3" style="width: 100%" id="pills-manage-content-tab" data-bs-toggle="pill" data-bs-target="#pills-manage-content" type="button" role="tab" aria-controls="pills-manage-content"><span class="ms-3">Manage content</span></button>
+                    </li>
+                    <li class="nav-item py-3" role="presentation">
+                        <button class="nav-link text-start text-white py-3" style="width: 100%" id="pills-manage-users-tab" data-bs-toggle="pill" data-bs-target="#pills-manage-users" type="button" role="tab" aria-controls="pills-manage-users"><span class="ms-3">Manage users</span></button>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-9">
+                <div class="tab-content" id="nav-admin-content">
+                    <div class="tab-pane fade show active" id="pills-user-activity" role="tabpanel"
+                         aria-labelledby="v-pills-user-activity-tab">User
+                    </div>
+                    <div class="tab-pane fade" id="pills-movies-statistics" role="tabpanel"
+                         aria-labelledby="v-pills-movies-statistics-tab">movies
+                    </div>
+                    <div class="tab-pane fade" id="pills-manage-content" role="tabpanel"
+                         aria-labelledby="v-pills-manage-content-tab">content
+                    </div>
+                    <div class="tab-pane fade" id="pills-manage-users" role="tabpanel"
+                         aria-labelledby="v-pills-manage-users-tab">users management
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

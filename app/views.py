@@ -251,6 +251,10 @@ def add_review(request, id):
     return redirect('movie_details', id=id)
 
 
-
+@require_http_methods(['GET'])
 def admin_page(request):
-    pass
+    logged_user = LoggedUser(request.session['user'])
+    if not logged_user.admin:
+        return redirect('recommendations')
+
+    return render(request, "admin_page.html")

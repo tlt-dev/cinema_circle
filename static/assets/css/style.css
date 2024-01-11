@@ -425,3 +425,7 @@ accordion-item:first-of-type {
     transition-duration: 0.5s;
 
 }
+
+#nav-admin > .nav-item > .active {
+    background-color: #212529!important;
+}
