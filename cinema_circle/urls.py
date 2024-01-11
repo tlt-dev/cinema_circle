@@ -29,11 +29,14 @@ urlpatterns = [
     path('cinema_circle/logout', views.logout, name='logout'),
     path('cinema_circle/recommendations', views.recommendations, name='recommendations'),
     path('cinema_circle/movies/<str:id>', views.movie_details, name='movie_details'),
-    path('cinema_cirlce/user/<str:id>', views.get_user_page, name='view_user_page'),
+    path('cinema_circle/user/<str:id>', views.get_user_page, name='view_user_page'),
     path('cinema_circle/movies/<str:id>/reviews/add', views.add_review, name='add_review'),
-    path('cinema_circle/user/recommanded_users', views.get_recommanded_users, name='get_recommanded_users'),
+    path('cinema_circle/recommanded_users', views.get_recommanded_users, name='get_recommanded_users'),
     path('cinema_circle/user/profile', views.get_user_profile, name='get_user_profile'),
     path("cinema_circle/movies/", views.all_movies, name="all_movies"),
     path("cinema_circle/movies/<str:id>/seen", views.mark_movie_as_seen, name="mark_movie_as_seen"),
     path("cinema_circle/movies/<str:id>/like/<int:value>", views.like_movie, name="like_movie"),
+    path("cinema_circle/user/<str:id>/follow/<int:value>", views.follow_user, name="follow_user"),
+
+    path('cinema_circle/admin/', views.admin_page, name='admin_page')
 ]
