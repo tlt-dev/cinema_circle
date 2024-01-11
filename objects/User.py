@@ -208,6 +208,3 @@ class User:
         records, summary, keys = graph_driver.execute_query(query, id=self.id)
 
         self.disliked_movies_count = records[0].data()['result']
-
-
-
