@@ -150,28 +150,26 @@ def get_user_page(request, id):
 
 
 def get_recommanded_users(request):
+
+    logged_user = LoggedUser(user=request.session['user'])
+
     recommandations = [
         {
             "category_title": "Most actives",
-            "user_list": list(user_collection.find().limit(6))[-6:]
+            "user_list": logged_user.get_most_active_users()
         },
         {
             "category_title": "Popular users",
-            "user_list": list(user_collection.find().limit(12))[-6:]
-        },
-        {
-            "category_title": "People who likes Thriller",
-            "user_list": list(user_collection.find().limit(18))[-6:]
-        },
-        {
-            "category_title": "People who likes Horror",
-            "user_list": list(user_collection.find().limit(24))[-6:]
-        },
-        {
-            "category_title": "Peole who likes Drama",
-            "user_list": list(user_collection.find().limit(30))[-6:]
-        },
-    ]
+            "user_list": logged_user.get_most_popular_users()
+        }]
+    logged_user.get_favorites_genres()
+    recommanded_user_list = logged_user.get_recommanded_user_with_genre([data["genre"] for data in logged_user.favorite_genres[:3]])
+    
+    for genre in logged_user.favorite_genres[:3]:
+        recommandations.append({
+            "category_title": "People who likes " + genre["genre"],
+            "user_list": logged_user.get_recommanded_user_by_genre(recommanded_user_list[genre["genre"]])
+        })
 
     return render(request, 'users_recommandations.html', {'recommandations': recommandations})
 
