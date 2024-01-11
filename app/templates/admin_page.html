@@ -13,26 +13,159 @@
             <div class="col-3" style="border-right: solid 2px #dd0000">
                 <ul class="nav nav-pills flex-column text-start" id="nav-admin" role="tablist">
                     <li class="nav-item py-3" role="presentation">
-                        <button class="nav-link active text-start text-white py-3" style="width: 100%" id="pills-user-activity-tab" data-bs-toggle="pill" data-bs-target="#pills-user-activity" type="button" role="tab" aria-controls="pills-user-activity" aria-selected="true"><span class="ms-3">Users activity</span></button>
+                        <button class="nav-link active text-start text-white py-3" style="width: 100%"
+                                id="pills-user-activity-tab" data-bs-toggle="pill" data-bs-target="#pills-user-activity"
+                                type="button" role="tab" aria-controls="pills-user-activity" aria-selected="true"><span
+                                class="ms-3" onclick="location.href='{% url 'admin_page' %}'">Users activity</span></button>
                     </li>
                     <li class="nav-item pt-3" role="presentation">
-                        <button class="nav-link text-start text-white py-3" style="width: 100%" id="pills-movies-statistics-tab" data-bs-toggle="pill" data-bs-target="#pills-movies-statistics" type="button" role="tab" aria-controls="pills-movies-statistics"><span class="ms-3">Movies statistics</span></button>
+                        <button class="nav-link text-start text-white py-3" style="width: 100%"
+                                id="pills-movies-statistics-tab" data-bs-toggle="pill"
+                                data-bs-target="#pills-movies-statistics" type="button" role="tab"
+                                aria-controls="pills-movies-statistics" onclick="get_movie_statistics()"><span class="ms-3">Movies statistics</span>
+                        </button>
                     </li>
                     <li class="nav-item py-3" role="presentation">
-                        <button class="nav-link text-start text-white py-3" style="width: 100%" id="pills-manage-content-tab" data-bs-toggle="pill" data-bs-target="#pills-manage-content" type="button" role="tab" aria-controls="pills-manage-content"><span class="ms-3">Manage content</span></button>
+                        <button class="nav-link text-start text-white py-3" style="width: 100%"
+                                id="pills-manage-content-tab" data-bs-toggle="pill"
+                                data-bs-target="#pills-manage-content" type="button" role="tab"
+                                aria-controls="pills-manage-content"><span class="ms-3">Manage content</span></button>
                     </li>
                     <li class="nav-item py-3" role="presentation">
-                        <button class="nav-link text-start text-white py-3" style="width: 100%" id="pills-manage-users-tab" data-bs-toggle="pill" data-bs-target="#pills-manage-users" type="button" role="tab" aria-controls="pills-manage-users"><span class="ms-3">Manage users</span></button>
+                        <button class="nav-link text-start text-white py-3" style="width: 100%"
+                                id="pills-manage-users-tab" data-bs-toggle="pill" data-bs-target="#pills-manage-users"
+                                type="button" role="tab" aria-controls="pills-manage-users"><span class="ms-3">Manage users</span>
+                        </button>
                     </li>
                 </ul>
             </div>
             <div class="col-9">
-                <div class="tab-content" id="nav-admin-content">
+                <div class="tab-content" id="nav-admin-content"
+                     style="overflow-y: auto; overflow-x: hidden; max-height: 90vh">
                     <div class="tab-pane fade show active" id="pills-user-activity" role="tabpanel"
-                         aria-labelledby="v-pills-user-activity-tab">User
+                         aria-labelledby="v-pills-user-activity-tab">
+                        <div class="row mt-3 ms-3" id="row_uo_filter">
+                            <div class="col-2">
+                                <h4>Overview</h4>
+                            </div>
+                                <div class="col-2"><button class="btn btn-outline-secondary active" id="buo_P15D" onclick="get_users_activities_overview('P15D')">15 days</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="buo_P1M" onclick="get_users_activities_overview('P1M')">1 month</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="buo_P3M" onclick="get_users_activities_overview('P3M')">3 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="buo_P6M" onclick="get_users_activities_overview('P6M')">6 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="buo_all" onclick="get_users_activities_overview('all')">All time</button></div>
+                            <hr>
+                            <div class="row" id="row_user_activity_overview">
+                                {% for category in users_activities_overview %}
+                                    <div class="col-3 bg-dark rounded text-center mx-auto">
+                                        <div class="row">
+                                            <div class="col pt-3">
+                                                <h5>{{ category.statistic }} </h5>
+                                                <p>{{ category.title }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <hr class="mt-2">
+                        </div>
+                        <div class="row mt-3 ms-3" id="row_ua_filter">
+                            <div class="col-2">
+                                <h4>Users activities</h4>
+                            </div>
+                            <div class="col-2"><button class="btn btn-outline-secondary active" id="bua_P15D" onclick="get_users_activities('P15D')">15 days</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bua_P1M" onclick="get_users_activities('P1M')">1 month</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bua_P3M" onclick="get_users_activities('P3M')">3 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bua_P6M" onclick="get_users_activities('P6M')">6 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bua_all" onclick="get_users_activities('all')">All time</button></div>
+                            <hr>
+                            <div class="row" id="row_users_activities">
+                                {% for category in users_activities %}
+                                    <div class="col-3 bg-dark rounded text-center p-0 me-2 ms-5 mt-2">
+                                        <div class="row">
+                                            <div class="col pt-3">
+                                                <h5>{{ category.statistic }} </h5>
+                                                <p>{{ category.title }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="row mt-3 ms-3" id="row_na_filter">
+                            <div class="col-2">
+                                <h4>Networking activities</h4>
+                            </div>
+                            <div class="col-2"><button class="btn btn-outline-secondary active" id="bna_P15D" onclick="get_users_networking_activities('P15D')">15 days</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bna_P1M" onclick="get_users_networking_activities('P1M')">1 month</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bna_P3M" onclick="get_users_networking_activities('P3M')">3 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bna_P6M" onclick="get_users_networking_activities('P6M')">6 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bna_all" onclick="get_users_networking_activities('all')">All time</button></div>
+                            <hr>
+                            <div class="row" id="row_networking_activities">
+                                {% for category in users_networking_activities %}
+                                    <div class="col-3 bg-dark rounded text-center mx-auto">
+                                        <div class="row">
+                                            <div class="col pt-3">
+                                                <h5>{{ category.statistic }} </h5>
+                                                <p>{{ category.title }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="pills-movies-statistics" role="tabpanel"
-                         aria-labelledby="v-pills-movies-statistics-tab">movies
+                         aria-labelledby="v-pills-movies-statistics-tab">
+                        <div class="row mt-3 ms-3">
+                            <div class="col-2">
+                                <h4>Overview</h4>
+                            </div>
+                            <hr>
+                            <div class="row" id="row_movies_overview">
+
+                            </div>
+                            <hr class="mt-2">
+                        </div>
+                        <div class="row ms-3">
+                            <div class="col-4">
+                                <h4>Movies per genre</h4>
+                            </div>
+                            <hr>
+                            <div class="row" id="row_movies_per_genre">
+
+                            </div>
+                            <hr class="mt-2">
+                        </div>
+                        <div class="row mt-3 ms-3" id="row_pg_filter">
+                            <div class="col-2">
+                                <h4>Popular Genres</h4>
+                            </div>
+                            <div class="col-2"><button class="btn btn-outline-secondary active" id="bpg_P15D" onclick="get_popular_genres('P15D')">15 days</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bpg_P1M" onclick="get_popular_genres('P1M')">1 month</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bpg_P3M" onclick="get_popular_genres('P3M')">3 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bpg_P6M" onclick="get_popular_genres('P6M')">6 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bpg_all" onclick="get_popular_genres('all')">All time</button></div>
+                            <hr>
+                            <div class="row" id="row_popular_genres">
+
+                            </div>
+                            <hr class="mt-2">
+                        </div>
+                        <div class="row mt-3 ms-3" id="row_ds_filter">
+                            <div class="col-2">
+                                <h4>More statistics</h4>
+                            </div>
+                            <div class="col-2"><button class="btn btn-outline-secondary active" id="bds_P15D" onclick="get_detailled_statistics('P15D')">15 days</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bds_P1M" onclick="get_detailled_statistics('P1M')">1 month</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bds_P3M" onclick="get_detailled_statistics('P3M')">3 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bds_P6M" onclick="get_detailled_statistics('P6M')">6 months</button></div>
+                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bds_all" onclick="get_detailled_statistics('all')">All time</button></div>
+                            <hr>
+                            <div class="row" id="row_detailled_statistics">
+
+                            </div>
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="pills-manage-content" role="tabpanel"
                          aria-labelledby="v-pills-manage-content-tab">content

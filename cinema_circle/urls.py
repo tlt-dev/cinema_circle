@@ -29,7 +29,7 @@ urlpatterns = [
     path('cinema_circle/logout', views.logout, name='logout'),
     path('cinema_circle/recommendations', views.recommendations, name='recommendations'),
     path('cinema_circle/movies/<str:id>', views.movie_details, name='movie_details'),
-    path('cinema_circle/user/<str:id>', views.get_user_page, name='view_user_page'),
+    path('cinema_circle/user/<str:id>/user_page', views.get_user_page, name='view_user_page'),
     path('cinema_circle/movies/<str:id>/reviews/add', views.add_review, name='add_review'),
     path('cinema_circle/recommanded_users', views.get_recommanded_users, name='get_recommanded_users'),
     path('cinema_circle/user/profile', views.get_user_profile, name='get_user_profile'),
@@ -38,5 +38,17 @@ urlpatterns = [
     path("cinema_circle/movies/<str:id>/like/<int:value>", views.like_movie, name="like_movie"),
     path("cinema_circle/user/<str:id>/follow/<int:value>", views.follow_user, name="follow_user"),
 
-    path('cinema_circle/admin/', views.admin_page, name='admin_page')
+    path('cinema_circle/admin/', views.admin_page, name='admin_page'),
+
+    path('cinema_circle/admin/users_activities_overview', views.users_activities_overview, name='users_activities_overview'),
+    path('cinema_circle/admin/users_activities_overview/<str:filter>', views.users_activities_overview, name='users_activities_overview'),
+    path('cinema_circle/admin/users_activities', views.users_activities, name='users_activities'),
+    path('cinema_circle/admin/users_activities/<str:filter>', views.users_activities, name='users_activities'),
+    path('cinema_circle/admin/users_networking_activities', views.users_networking_activities, name='users_networking_activities'),
+    path('cinema_circle/admin/users_networking_activities/<str:filter>', views.users_networking_activities, name='users_networking_activities'),
+
+    path('cinema_circle/admin/movie_statistics', views.movies_statistics, name='movies_statistics'),
+    path('cinema_circle/admin/popular_genres/<str:filter>', views.get_admin_popular_genres, name='get_admin_popular_genres'),
+    path('cinema_circle/admin/detailled_statistics/<str:filter>', views.get_detailled_statistics, name='get_detailled_statistics'),
+
 ]

@@ -11,6 +11,8 @@ from django.views.decorators.http import require_http_methods
 from objects.LoggedUser import LoggedUser
 from objects.User import User
 from utils_functions import get_genres
+from statistics_function import *
+
 from neo4j import GraphDatabase
 
 import logging
@@ -22,9 +24,6 @@ movie_collection = document_db['movie']
 user_collection = document_db['user']
 
 graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsmdb_2024"), database="cinemacircle")
-
-graph_driver.verify_connectivity()
-
 
 def index(request):
     return render(request, 'index.html')
@@ -255,4 +254,94 @@ def admin_page(request):
     if not logged_user.admin:
         return redirect('recommendations')
 
-    return render(request, "admin_page.html")
+    users_activities_overview = []
+    users_activities_overview.append({'title': 'Users', 'statistic': get_total_users_count()})
+    users_activities_overview.append({'title': 'Actives users', 'statistic': get_active_users()})
+    users_activities_overview.append({'title': 'New users', 'statistic': get_new_users_count()})
+
+    users_activities=[]
+    users_activities.append({'title': 'users have seen a movie', 'statistic': get_users_who_seen_movie()})
+    users_activities.append({'title': 'users liked a movie', 'statistic': get_users_who_like_movie()})
+    users_activities.append({'title': 'users have poster a review', 'statistic': get_users_who_posted_review()})
+    users_activities.append({'title': 'movies seen per user', 'statistic': get_average_seens_per_user()})
+    users_activities.append({'title': 'movies liked per user', 'statistic': get_average_likes_per_user()})
+    users_activities.append({'title': 'reviews posted per user', 'statistic': get_average_reviews_per_user()})
+
+    user_networking_activities = []
+    user_networking_activities.append({'title': 'followers per user', 'statistic': get_average_followers_per_user()})
+    user_networking_activities.append({'title': 'follows interaction', 'statistic': get_follows_interation()})
+
+    return render(request, "admin_page.html", {'users_activities_overview': users_activities_overview, 'users_activities': users_activities, 'users_networking_activities': user_networking_activities})
+
+@require_http_methods(['GET'])
+def users_activities_overview(request, filter=None):
+    users_activities_overview = []
+    users_activities_overview.append({'title': 'Users', 'statistic': get_total_users_count()})
+    users_activities_overview.append({'title': 'Actives users', 'statistic': get_active_users(filter)})
+    users_activities_overview.append({'title': 'New users', 'statistic': get_new_users_count(filter)})
+
+    return HttpResponse(json.dumps({'overview': users_activities_overview, 'filter': filter}))
+
+
+@require_http_methods(['GET'])
+def users_activities(request, filter=None):
+    users_activities = []
+    users_activities.append({'title': 'users have seen a movie', 'statistic': get_users_who_seen_movie(filter)})
+    users_activities.append({'title': 'users liked a movie', 'statistic': get_users_who_like_movie(filter)})
+    users_activities.append({'title': 'users have poster a review', 'statistic': get_users_who_posted_review(filter)})
+    users_activities.append({'title': 'movies seen per user', 'statistic': get_average_seens_per_user(filter)})
+    users_activities.append({'title': 'movies liked per user', 'statistic': get_average_likes_per_user(filter)})
+    users_activities.append({'title': 'reviews posted per user', 'statistic': get_average_reviews_per_user(filter)})
+
+    return HttpResponse(json.dumps({'activities': users_activities, 'filter': filter}))
+@require_http_methods(['GET'])
+def users_networking_activities(request, filter=None):
+    user_networking_activities = []
+    user_networking_activities.append({'title': 'followers per user', 'statistic': get_average_followers_per_user(filter)})
+    user_networking_activities.append({'title': 'follows interaction', 'statistic': get_follows_interation(filter)})
+
+    return HttpResponse(json.dumps({'activities': user_networking_activities, 'filter': filter}))
+
+
+@require_http_methods(['GET'])
+def movies_statistics(request):
+    movies_statistics_overview = []
+    movies_statistics_overview.append({'title': 'Movies', 'statistic': get_movies_count()})
+    movies_statistics_overview.append({'title': 'Genres', 'statistic': get_genres_count()})
+
+    movies_per_genre = []
+    movies_genres = get_movies_per_genres()
+    for genre in movies_genres:
+        movies_per_genre.append({'title': genre['name'], 'statistic': genre['nb_movies']})
+
+    popular_genres = []
+    popular = get_popular_genres()
+    for genre in popular:
+        popular_genres.append({'title': 'Interactions on' + genre['name'], 'statistic': genre['movies_count']})
+
+    detailled_statistics = []
+    detailled_statistics.append({'title': 'Views per movie', 'statistic': get_average_views_per_movie()})
+    detailled_statistics.append({'title': 'Likes per movie', 'statistic': get_average_like_interactions_per_movie()})
+    detailled_statistics.append({'title': 'Reviews per movie', 'statistic': get_average_reviews_per_movie()})
+
+
+    return HttpResponse(json.dumps({'overview': movies_statistics_overview, 'popular': popular_genres, 'movies_per_genre': movies_per_genre, 'detailled_statistics': detailled_statistics}))
+
+
+def get_admin_popular_genres(request, filter):
+    popular_genres = []
+    popular = get_popular_genres(filter)
+    for genre in popular:
+        popular_genres.append({'title': 'Interactions on' + genre['name'], 'statistic': genre['movies_count']})
+
+    return HttpResponse(json.dumps({'popular': popular_genres, 'filter': filter}))
+
+
+def get_detailled_statistics(request, filter):
+    detailled_statistics = []
+    detailled_statistics.append({'title': 'Views per movie', 'statistic': get_average_views_per_movie(filter)})
+    detailled_statistics.append({'title': 'Likes per movie', 'statistic': get_average_like_interactions_per_movie(filter)})
+    detailled_statistics.append({'title': 'Reviews per movie', 'statistic': get_average_reviews_per_movie(filter)})
+
+    return HttpResponse(json.dumps({'detailled_statistics': detailled_statistics, 'filter': filter}))
+
