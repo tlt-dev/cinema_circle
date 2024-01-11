@@ -241,3 +241,163 @@ class LoggedUser(User):
         for i in range(len(movies)):
             movies[i]["_id"] =  movies[i].pop("id")
         return movies
+
+    def get_most_active_users(self):
+        query = """
+        MATCH (user:User {id: $id})
+            MATCH (otherUser:User)
+            WHERE NOT (user)-[:FOLLOWS]->(otherUser) AND user <> otherUser
+            WITH otherUser
+        MATCH (otherUser)-[r:LIKED|REVIEWED]->(:Movie)
+        WITH otherUser, r,
+            CASE
+            WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 3 
+            WHEN datetime(r.date) >= datetime() - duration('P1M') THEN 2 
+            ELSE 1 
+            END AS recentActivityScore
+        WITH otherUser, SUM(recentActivityScore) AS activityScore
+        RETURN otherUser AS User
+        ORDER BY activityScore DESC
+        LIMIT 6
+        """
+        records, summary, keys = graph_driver.execute_query(query,id=self.id)
+
+        users = [record.data()['User'] for record in records]
+
+        for i in range(len(users)):
+            users[i]["_id"] =  users[i].pop("id")
+        return users
+
+    def get_most_popular_users(self):
+        query = """
+            MATCH (user:User {id: $id})
+            MATCH (otherUser:User)
+            WHERE NOT (user)-[:FOLLOWS]->(otherUser) AND user <> otherUser
+            WITH otherUser
+            MATCH (otherUser)-[f:FOLLOWS]->(:User)
+            WITH otherUser, COUNT(f) AS followersCount
+            RETURN otherUser AS User
+            ORDER BY followersCount DESC
+            LIMIT 6
+        """
+
+        records, summary, keys = graph_driver.execute_query(query,id=self.id)
+
+        users = [record.data()['User'] for record in records]
+
+        for i in range(len(users)):
+            users[i]["_id"] =  users[i].pop("id")
+        return users
+    
+    def get_recommanded_user_by_genre(self,user_list):
+        query = """
+            UNWIND $user_list AS userInfo
+            MATCH (u:User {id:userInfo.id})
+            MATCH (u)-[seen:SEEN]->(movie)
+            WITH u, COALESCE(SUM(
+                CASE
+                WHEN datetime(seen.date) >= datetime() - duration('P1D') THEN 25
+                WHEN datetime(seen.date) >= datetime() - duration('P3D') THEN 20
+                WHEN datetime(seen.date) >= datetime() - duration('P1W') THEN 10
+                WHEN datetime(seen.date) >= datetime() - duration('P2W') THEN 5
+                ELSE 0
+                END
+            ), 0) AS seenScore, COUNT(seen) AS moviesWatched
+            OPTIONAL MATCH (u)-[liked:LIKED]->(movie)
+            WITH u, seenScore + moviesWatched AS InterestScore, COALESCE(SUM(
+                CASE
+                WHEN datetime(liked.date) >= datetime() - duration('P1D') THEN 35
+                WHEN datetime(liked.date) >= datetime() - duration('P3D') THEN 30
+                WHEN datetime(liked.date) >= datetime() - duration('P1W') THEN 25
+                WHEN datetime(liked.date) >= datetime() - duration('P2W') THEN 20
+                ELSE 0
+                END
+            ), 0) AS likedScore, COUNT(liked) AS likes
+            OPTIONAL MATCH (u)-[reviewed:REVIEWED]->(movie)
+            WITH u, InterestScore + likedScore + likes *1.5 AS InterestScore, COALESCE(SUM(
+                CASE
+                WHEN datetime(reviewed.date) >= datetime() - duration('P1D') THEN 45
+                WHEN datetime(reviewed.date) >= datetime() - duration('P3D') THEN 40
+                WHEN datetime(reviewed.date) >= datetime() - duration('P1W') THEN 35
+                WHEN datetime(reviewed.date) >= datetime() - duration('P2W') THEN 25
+                ELSE 0
+                END
+            ), 0) AS reviewedScore, COUNT(reviewed) AS reviews
+            WITH u, 
+                InterestScore + reviewedScore + reviews * 2 AS InterestScore
+            RETURN u AS User, InterestScore
+            ORDER BY InterestScore DESC
+            LIMIT 6
+        """
+        records, summary, keys = graph_driver.execute_query(query,user_list=user_list)
+
+        users = [record.data()['User'] for record in records]
+
+        for i in range(len(users)):
+            users[i]["_id"] =  users[i].pop("id")
+        return users
+
+    def get_recommanded_user_with_genre(self,genre_list):
+        query = """
+            MATCH (otherUser:User) 
+            WITH otherUser
+            LIMIT 500
+            MATCH (otherUser)-[r:LIKED|REVIEWED|SEEN]->(m:Movie)-[:TYPE_OF]->(g:Genre)
+            WITH otherUser, g, r,
+                CASE 
+                WHEN r:SEEN THEN 
+                    CASE
+                    WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 4
+                    WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 3
+                    WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 2
+                    ELSE 1
+                    END
+                WHEN r:LIKED AND r.like = 0 THEN 
+                    CASE
+                    WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 7
+                    WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 5
+                    WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 2
+                    ELSE 3
+                    END
+                WHEN r:REVIEWED AND r.like = 0 THEN 
+                    CASE
+                    WHEN datetime(r.date) >= datetime() - duration('P3D') THEN 15
+                    WHEN datetime(r.date) >= datetime() - duration('P1W') THEN 12
+                    WHEN datetime(r.date) >= datetime() - duration('P2W') THEN 9
+                    ELSE 6
+                    END
+                WHEN r:LIKED AND r.like = -1 THEN 
+                    CASE
+                    WHEN datetime(r.date) >= datetime() - duration('P3D') THEN -7
+                    WHEN datetime( r.date) >= datetime() - duration('P1W') THEN -5
+                    WHEN datetime(r.date) >= datetime() - duration('P2W') THEN -2
+                    ELSE -3
+                    END
+                WHEN r:REVIEWED AND r.like = -1 THEN 
+                    CASE
+                    WHEN datetime(r.date) >= datetime() - duration('P3D') THEN -15
+                    WHEN datetime(r.date) >= datetime() - duration('P1W') THEN -12
+                    WHEN datetime(r.date) >= datetime() - duration('P2W') THEN -9
+                    ELSE -6
+                    END
+                END AS score
+        WITH otherUser, g, SUM(score) + 100 AS totalScore
+        ORDER BY totalScore DESC
+        WITH otherUser, COLLECT(g)[0] AS favoriteGenre
+        WHERE favoriteGenre.name IN $genre_list
+        RETURN otherUser AS User, favoriteGenre.name as favoriteGenre
+        """
+        records, summary, keys = graph_driver.execute_query(query,genre_list=genre_list)
+
+        result = {}
+
+        for record in records:
+            favoriteGenre = record.data()["favoriteGenre"]
+            user = record.data()["User"]
+            if favoriteGenre in result:
+                result[favoriteGenre].append(user)
+            else:
+                result[favoriteGenre] = []
+                result[favoriteGenre].append(user)
+
+        return result
