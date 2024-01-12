@@ -9,6 +9,7 @@
         </div>
     </div>
     <div class="container ms-0" style="overflow-y: scroll; overflow-x: scroll; height: 90vh">
+        {% csrf_token %}
         <div class="row" style="height: 90vh;">
             <div class="col-3" style="border-right: solid 2px #dd0000">
                 <ul class="nav nav-pills flex-column text-start" id="nav-admin" role="tablist">
@@ -16,20 +17,23 @@
                         <button class="nav-link active text-start text-white py-3" style="width: 100%"
                                 id="pills-user-activity-tab" data-bs-toggle="pill" data-bs-target="#pills-user-activity"
                                 type="button" role="tab" aria-controls="pills-user-activity" aria-selected="true"><span
-                                class="ms-3" onclick="location.href='{% url 'admin_page' %}'">Users activity</span></button>
+                                class="ms-3" onclick="location.href='{% url 'admin_page' %}'">Users activity</span>
+                        </button>
                     </li>
                     <li class="nav-item pt-3" role="presentation">
                         <button class="nav-link text-start text-white py-3" style="width: 100%"
                                 id="pills-movies-statistics-tab" data-bs-toggle="pill"
                                 data-bs-target="#pills-movies-statistics" type="button" role="tab"
-                                aria-controls="pills-movies-statistics" onclick="get_movie_statistics()"><span class="ms-3">Movies statistics</span>
+                                aria-controls="pills-movies-statistics" onclick="get_movie_statistics()"><span
+                                class="ms-3">Movies statistics</span>
                         </button>
                     </li>
                     <li class="nav-item py-3" role="presentation">
                         <button class="nav-link text-start text-white py-3" style="width: 100%"
                                 id="pills-manage-content-tab" data-bs-toggle="pill"
                                 data-bs-target="#pills-manage-content" type="button" role="tab"
-                                aria-controls="pills-manage-content"><span class="ms-3">Manage content</span></button>
+                                aria-controls="pills-manage-content" onclick="get_movies_list()"><span class="ms-3">Manage content</span>
+                        </button>
                     </li>
                     <li class="nav-item py-3" role="presentation">
                         <button class="nav-link text-start text-white py-3" style="width: 100%"
@@ -48,11 +52,31 @@
                             <div class="col-2">
                                 <h4>Overview</h4>
                             </div>
-                                <div class="col-2"><button class="btn btn-outline-secondary active" id="buo_P15D" onclick="get_users_activities_overview('P15D')">15 days</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="buo_P1M" onclick="get_users_activities_overview('P1M')">1 month</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="buo_P3M" onclick="get_users_activities_overview('P3M')">3 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="buo_P6M" onclick="get_users_activities_overview('P6M')">6 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="buo_all" onclick="get_users_activities_overview('all')">All time</button></div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary active" id="buo_P15D"
+                                        onclick="get_users_activities_overview('P15D')">15 days
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="buo_P1M"
+                                        onclick="get_users_activities_overview('P1M')">1 month
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="buo_P3M"
+                                        onclick="get_users_activities_overview('P3M')">3 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="buo_P6M"
+                                        onclick="get_users_activities_overview('P6M')">6 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="buo_all"
+                                        onclick="get_users_activities_overview('all')">All time
+                                </button>
+                            </div>
                             <hr>
                             <div class="row" id="row_user_activity_overview">
                                 {% for category in users_activities_overview %}
@@ -72,11 +96,31 @@
                             <div class="col-2">
                                 <h4>Users activities</h4>
                             </div>
-                            <div class="col-2"><button class="btn btn-outline-secondary active" id="bua_P15D" onclick="get_users_activities('P15D')">15 days</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bua_P1M" onclick="get_users_activities('P1M')">1 month</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bua_P3M" onclick="get_users_activities('P3M')">3 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bua_P6M" onclick="get_users_activities('P6M')">6 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bua_all" onclick="get_users_activities('all')">All time</button></div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary active" id="bua_P15D"
+                                        onclick="get_users_activities('P15D')">15 days
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bua_P1M"
+                                        onclick="get_users_activities('P1M')">1 month
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bua_P3M"
+                                        onclick="get_users_activities('P3M')">3 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bua_P6M"
+                                        onclick="get_users_activities('P6M')">6 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bua_all"
+                                        onclick="get_users_activities('all')">All time
+                                </button>
+                            </div>
                             <hr>
                             <div class="row" id="row_users_activities">
                                 {% for category in users_activities %}
@@ -95,11 +139,31 @@
                             <div class="col-2">
                                 <h4>Networking activities</h4>
                             </div>
-                            <div class="col-2"><button class="btn btn-outline-secondary active" id="bna_P15D" onclick="get_users_networking_activities('P15D')">15 days</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bna_P1M" onclick="get_users_networking_activities('P1M')">1 month</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bna_P3M" onclick="get_users_networking_activities('P3M')">3 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bna_P6M" onclick="get_users_networking_activities('P6M')">6 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bna_all" onclick="get_users_networking_activities('all')">All time</button></div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary active" id="bna_P15D"
+                                        onclick="get_users_networking_activities('P15D')">15 days
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bna_P1M"
+                                        onclick="get_users_networking_activities('P1M')">1 month
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bna_P3M"
+                                        onclick="get_users_networking_activities('P3M')">3 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bna_P6M"
+                                        onclick="get_users_networking_activities('P6M')">6 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bna_all"
+                                        onclick="get_users_networking_activities('all')">All time
+                                </button>
+                            </div>
                             <hr>
                             <div class="row" id="row_networking_activities">
                                 {% for category in users_networking_activities %}
@@ -141,11 +205,31 @@
                             <div class="col-2">
                                 <h4>Popular Genres</h4>
                             </div>
-                            <div class="col-2"><button class="btn btn-outline-secondary active" id="bpg_P15D" onclick="get_popular_genres('P15D')">15 days</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bpg_P1M" onclick="get_popular_genres('P1M')">1 month</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bpg_P3M" onclick="get_popular_genres('P3M')">3 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bpg_P6M" onclick="get_popular_genres('P6M')">6 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bpg_all" onclick="get_popular_genres('all')">All time</button></div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary active" id="bpg_P15D"
+                                        onclick="get_popular_genres('P15D')">15 days
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bpg_P1M"
+                                        onclick="get_popular_genres('P1M')">1 month
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bpg_P3M"
+                                        onclick="get_popular_genres('P3M')">3 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bpg_P6M"
+                                        onclick="get_popular_genres('P6M')">6 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bpg_all"
+                                        onclick="get_popular_genres('all')">All time
+                                </button>
+                            </div>
                             <hr>
                             <div class="row" id="row_popular_genres">
 
@@ -156,25 +240,132 @@
                             <div class="col-2">
                                 <h4>More statistics</h4>
                             </div>
-                            <div class="col-2"><button class="btn btn-outline-secondary active" id="bds_P15D" onclick="get_detailled_statistics('P15D')">15 days</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bds_P1M" onclick="get_detailled_statistics('P1M')">1 month</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bds_P3M" onclick="get_detailled_statistics('P3M')">3 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bds_P6M" onclick="get_detailled_statistics('P6M')">6 months</button></div>
-                                 <div class="col-2"><button class="btn btn-outline-secondary" id="bds_all" onclick="get_detailled_statistics('all')">All time</button></div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary active" id="bds_P15D"
+                                        onclick="get_detailled_statistics('P15D')">15 days
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bds_P1M"
+                                        onclick="get_detailled_statistics('P1M')">1 month
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bds_P3M"
+                                        onclick="get_detailled_statistics('P3M')">3 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bds_P6M"
+                                        onclick="get_detailled_statistics('P6M')">6 months
+                                </button>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-outline-secondary" id="bds_all"
+                                        onclick="get_detailled_statistics('all')">All time
+                                </button>
+                            </div>
                             <hr>
                             <div class="row" id="row_detailled_statistics">
 
                             </div>
                         </div>
                     </div>
+
+
                     <div class="tab-pane fade" id="pills-manage-content" role="tabpanel"
-                         aria-labelledby="v-pills-manage-content-tab">content
+                         aria-labelledby="v-pills-manage-content-tab">
+                        <div class="row my-3">
+                            <div class="col-2">
+                                <button class="btn btn-outline-success" onclick="showModalMovie()">Add movie</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <table class="table text-white">
+                                    <thead>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Release date</th>
+                                    <th>Runtime</th>
+                                    <th></th>
+                                    <th></th>
+                                    </thead>
+                                    <tbody id="table_movies">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row text-center justify-content-center">
+                            <div class="col-3">
+                                <a href="#" id="link_next_page"><p class="text-secondary underline">Load More Movies</p></a>
+                            </div>
+                        </div>
                     </div>
+
+
                     <div class="tab-pane fade" id="pills-manage-users" role="tabpanel"
-                         aria-labelledby="v-pills-manage-users-tab">users management
+                         aria-labelledby="v-pills-manage-users-tab">
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modal_movie" tabindex="-1" aria-labelledby="modalMovie"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg shadow">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Movie</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="resetModalMovie()"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <div class="row justify-content-center">
+                            <input type="hidden" name="movie_id" value="">
+                            <div class="col-5">
+                                <input type="text" name="title" class="form-control bg-dark"
+                                       placeholder="Title" required>
+                            </div>
+                            <div class="col-5">
+                                <input type="date" name="release_date" class="form-control bg-dark" placeholder="date" required>
+                            </div>
+                        </div>
+                        <div class="row mt-3 justify-content-center">
+                            <div class="col-5">
+                                <label for="genre">Genre :</label>
+                                <select class="form-control bg-dark" name="genre" id="genre" required>
+
+                                </select>
+                            </div>
+                            <div class="col-5">
+                                <label for="runtime">Runtime</label>
+                                <input type="number" name="runtime" min=0 placeholder="minutes"
+                                       class="form-control bg-dark" required>
+                            </div>
+                        </div>
+                        <div class="row mt-3 justify-content-center">
+                            <div class="col-10">
+                                <textarea class="form-control bg-dark" name="overview" rows="10"
+                                          placeholder="Overview" required></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-3 justify-content-center">
+                            <div class="col-3">
+                                <button type="submit" class="btn btn-success" id="btn_modal_movie"
+                                        onclick="saveModalMovie()">Save
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

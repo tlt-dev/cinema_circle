@@ -97,9 +97,8 @@ class User:
             else:
                 return user
 
-    def update_multiple_fields(self, id, first_name=None, last_name=None, email=None, password=None):
+    def update_multiple_fields(self, first_name=None, last_name=None, email=None, password=None):
         fields = {}
-        fields['id'] = ObjectId(id)
         if first_name:
             fields['first_name'] = first_name
         if last_name:
@@ -110,7 +109,7 @@ class User:
             fields['password'] = password
 
         try:
-            user_collection.update_one({fields})
+            user_collection.update_one({'_id': ObjectId(self.id)}, fields)
         except Exception as e:
             print("Error while updating user. Error : ", e)
 

@@ -156,6 +156,12 @@ def get_average_likes_per_user(filter="P15D"):
 
 
 def get_average_reviews_per_user(filter="P15D"):
+    # result = movie_collection.aggregate(
+    #     [{'$unwind': "$comments"},
+    #      {'$group': {'_id': "$comments.user.id", 'commentsCount': {'$sum': 1}}},
+    #      {'$group': {'_id': None, 'averageComments': {'$avg': "$commentsCount"}}}])
+    # for res in result:
+    #     print(res)
     if filter == "all":
         query = """
                 MATCH (u:User)-[r:REVIEWED]->(:Movie)

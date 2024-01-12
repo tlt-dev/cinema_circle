@@ -50,5 +50,10 @@ urlpatterns = [
     path('cinema_circle/admin/movie_statistics', views.movies_statistics, name='movies_statistics'),
     path('cinema_circle/admin/popular_genres/<str:filter>', views.get_admin_popular_genres, name='get_admin_popular_genres'),
     path('cinema_circle/admin/detailled_statistics/<str:filter>', views.get_detailled_statistics, name='get_detailled_statistics'),
+    path('cinema_circle/admin/movie_list/<int:page>', views.get_movie_list, name='get_movie_list'),
+    path('cinema_circle/admin/movie/<str:id>', views.get_movie, name='get_movie'),
+    path('cinema_circle/admin/add/movie', views.add_movie, name='add_movie'),
+    path('cinema_circle/admin/movie/<str:id>/edit', views.edit_movie, name='edit_movie'),
+    path('cinema_circle/admin/movie/<str:id>/delete', views.delete_movie, name='delete_movie'),
 
 ]

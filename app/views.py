@@ -1,14 +1,16 @@
-import datetime
+from datetime import datetime
 import json
 import random
 import pymongo
 
-from bson import ObjectId
+from bson import ObjectId, json_util
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
+from django.core.paginator import Paginator, EmptyPage
 
 from objects.LoggedUser import LoggedUser
+from objects.Movie import Movie
 from objects.User import User
 from utils_functions import get_genres
 from statistics_function import *
@@ -345,3 +347,65 @@ def get_detailled_statistics(request, filter):
 
     return HttpResponse(json.dumps({'detailled_statistics': detailled_statistics, 'filter': filter}))
 
+
+def get_movie_list(request, page):
+    movies_list = list(movie_collection.find(projection=('title', 'release_date', 'runtime')).sort({'_id': -1}))
+    paginator = Paginator(movies_list, 10)
+
+    try:
+        movies = paginator.page(page)
+    except EmptyPage:
+        movies = paginator.page(paginator.num_pages)
+
+    return HttpResponse(json_util.dumps({'movies': movies.object_list, 'page': int(page)}))
+
+
+def get_movie(request, id):
+    movie = Movie(movie=movie_collection.find_one({'_id': ObjectId(id)}))
+
+    return HttpResponse(json_util.dumps(movie.to_json()))
+
+
+def add_movie(request):
+    if request.POST.get('release_date'):
+        date = request.POST.get('release_date').split('-')
+        release_date = datetime(int(date[0]), int(date[1]), int(date[2]))
+    else:
+        release_date = None
+
+    movie = Movie(
+        title=request.POST.get('title'),
+        release_date=release_date,
+        runtime=int(request.POST.get('runtime')),
+        genre=[request.POST.get('genre')],
+        overview=request.POST.get('overview')
+    )
+
+    inserted_id = movie.create()
+    return HttpResponse(json.dumps({'movie_id': str(inserted_id)}))
+
+def edit_movie(request, id):
+    movie = Movie(movie=movie_collection.find_one({'_id': ObjectId(id)}))
+
+
+    if request.POST.get('release_date'):
+        date = request.POST.get('release_date').split('-')
+        release_date = datetime(int(date[0]), int(date[1]), int(date[2]))
+    else:
+        release_date = None
+    movie.update_multiple_fields(
+        title=request.POST.get('title'),
+        release_date=release_date,
+        runtime=int(request.POST.get('runtime')),
+        genre=[request.POST.get('genre')],
+        overview=request.POST.get('overview')
+    )
+
+    return HttpResponse(json.dumps({'movie_id': movie.id}))
+
+
+def delete_movie(request, id):
+    movie = Movie(id=id)
+    movie.delete()
+
+    return HttpResponse(json.dumps({'movie_id': movie.id}))
