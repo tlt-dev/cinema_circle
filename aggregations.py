@@ -1,6 +1,6 @@
 import pymongo
 
-client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
+client = pymongo.MongoClient("mongodb://localhost:27018,localhost:27019,localhost:27020/test?replicaSet=rs0&w=1")
 document_db = client['cinema_circle']
 movie_collection = document_db['movie']
 
