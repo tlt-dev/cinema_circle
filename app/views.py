@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator, EmptyPage
 
+from aggregations import aggreg_movies_by_year, get_all_years, aggreg_movies_by_actor, get_actors
 from objects.LoggedUser import LoggedUser
 from objects.Movie import Movie
 from objects.User import User
@@ -249,6 +250,27 @@ def add_review(request, id):
 
     return redirect('movie_details', id=id)
 
+
+def get_movies_by_year(request):
+    years = get_all_years()
+    filter = request.GET.get('filter') if request.GET.get('filter') is not None else 2024
+    movies_by_year = aggreg_movies_by_year(int(filter))
+
+    return render(request, 'movies_by_year.html', {'years': years, 'movies_by_year': movies_by_year, 'filter': int(filter)})
+
+def get_movies_by_actors(request):
+    if 'search' not in request.GET:
+        return render(request, 'movies_by_actor.html')
+    else:
+        actors = get_actors(request.GET.get('search'))
+        movies_by_actor = aggreg_movies_by_actor(actors)
+        print(movies_by_actor)
+
+        return render(request, 'movies_by_actor.html', {'movies_by_actor': movies_by_actor})
+    # filter = request.GET.get('filter') if request.GET.get('filter') is not None else "Marlon Brando"
+    # movies_by_actor = aggreg_movies_by_actor(filter)
+    #
+    #
 
 @require_http_methods(['GET'])
 def admin_page(request):

@@ -13,16 +13,21 @@
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav mx-auto">
 
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{% url 'all_movies' %}">ALL</a>
-                        </li>
+{#                        <li class="nav-item">#}
+{#                            <a class="nav-link text-white" href="{% url 'all_movies' %}">ALL</a>#}
+{#                        </li>#}
 
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="{% url 'recommendations' %}">Movies</a>
+                        <li class="nav-item mx-3">
+                            <a class="nav-link text-white" href="{% url 'recommendations' %}">RecommandedMovies</a>
                         </li>
                         <li class="nav-item mx-3">
                             <a class="nav-link text-white" href="{% url 'get_recommanded_users' %}">Recommanded
                                 Users</a>
+                        </li>
+                        <li class="nav-item mx-3">
+                            <a class="nav-link text-white" href="{% url 'get_movies_by_years' %}">Movies by years</a>
+                        </li><li class="nav-item mx-3">
+                            <a class="nav-link text-white" href="{% url 'get_movies_by_actors' %}">Movies by actors</a>
                         </li>
                     </ul>
                     <div class="d-flex">

@@ -38,6 +38,9 @@ urlpatterns = [
     path("cinema_circle/movies/<str:id>/like/<int:value>", views.like_movie, name="like_movie"),
     path("cinema_circle/user/<str:id>/follow/<int:value>", views.follow_user, name="follow_user"),
 
+    path('cinema_circle/movies_group_by_year', views.get_movies_by_year, name='get_movies_by_years'),
+    path('cinema_circle/movies_by_actors', views.get_movies_by_actors, name='get_movies_by_actors'),
+
     path('cinema_circle/admin/', views.admin_page, name='admin_page'),
 
     path('cinema_circle/admin/users_activities_overview', views.users_activities_overview,
