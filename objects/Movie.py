@@ -80,7 +80,7 @@ class Movie:
             print("Error while creating movie. Error : ", e)
         else:
             graph_driver.execute_query("CREATE (Movie {id: $id, title: $title, poster_path: ''})", id=str(result.inserted_id), title=self.title)
-            return result.inserted_id
+            return str(result.inserted_id)
 
     def delete(self):
         try:

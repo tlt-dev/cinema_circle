@@ -1,9 +1,7 @@
-from xml.dom.minidom import Document
-
 from bson import ObjectId, json_util
 import pymongo
 from neo4j import GraphDatabase
-
+from datetime import datetime
 
 client = pymongo.MongoClient(host="localhost", port=27017, username=None, password=None)
 document_db = client['cinema_circle']
@@ -13,7 +11,8 @@ graph_driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "lsm
 
 
 class User:
-    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None, id=None, creation_date=None):
+    def __init__(self, user=None, first_name=None, last_name=None, email=None, password=None, profile_pic_path=None,
+                 id=None, creation_date=None, admin=None):
         ''' Use user arg if user dict from db'''
         if user is not None:
             self.id = str(user['_id']) if "_id" in user.keys() else str(user['id'])
@@ -23,6 +22,7 @@ class User:
             self.password = user['password']
             self.profile_pic_path = user['profile_pic_path']
             self.creation_date = user['creation_date']
+            self.admin = user['admin']
         else:
             self.id = str(id)
             self.first_name = first_name
@@ -31,6 +31,7 @@ class User:
             self.password = password
             self.profile_pic_path = profile_pic_path
             self.creation_date = creation_date
+            self.admin = admin
         self.watched_list = None
         self.reviews_count = None
         self.liked_movies_count = None
@@ -47,6 +48,7 @@ class User:
             'password': self.password,
             'profile_pic_path': self.profile_pic_path,
             'creation_date': self.creation_date.strftime('%Y/%m/%d'),
+            'admin': self.admin
         }
 
     def user_exist(self):
@@ -57,23 +59,31 @@ class User:
 
     def create(self):
         try:
-             result = user_collection.insert_one({
+            result = user_collection.insert_one({
                 'first_name': self.first_name,
                 'last_name': self.last_name,
                 'email': self.email,
                 'password': self.password,
-                'profile_pic_path': self.profile_pic_path
+                'profile_pic_path': self.profile_pic_path,
+                'creation_date': datetime.now(),
+                'admin': self.admin
             })
         except Exception as e:
             print("Error while creating user. Error : ", e)
         else:
-            return result.inserted_id
+            graph_driver.execute_query(
+                "CREATE (User {id: $id, first_name: $first_name, last_name: $last_name, profile_pic_path: $profile_pic_path})",
+                id=str(result.inserted_id), first_name=self.first_name, last_name=self.last_name,
+                profile_pic_path=self.profile_pic_path)
+            return str(result.inserted_id)
 
     def delete(self):
         try:
             user_collection.delete_one({'_id': ObjectId(self.id)})
         except Exception as e:
             print("Error while deleting user. Error : ", e)
+        else:
+            graph_driver.execute_query("MATCH (u:User {id: $id}) DELETE u", id=self.id)
 
     def get_by_id(self):
         if self.id is not None:
@@ -97,7 +107,7 @@ class User:
             else:
                 return user
 
-    def update_multiple_fields(self, first_name=None, last_name=None, email=None, password=None):
+    def update_multiple_fields(self, first_name=None, last_name=None, email=None, password=None, admin=None):
         fields = {}
         if first_name:
             fields['first_name'] = first_name
@@ -107,11 +117,26 @@ class User:
             fields['email'] = email
         if password:
             fields['password'] = password
+        if admin is not None:
+            fields['admin'] = admin
 
         try:
-            user_collection.update_one({'_id': ObjectId(self.id)}, fields)
+            user_collection.update_one({'_id': ObjectId(self.id)}, {'$set': fields})
         except Exception as e:
             print("Error while updating user. Error : ", e)
+        else:
+            if first_name and last_name:
+                graph_driver.execute_query(
+                    "MATCH (u:User {id: $id}) SET u.first_name = $first_name, u.last_name = $last_name", id=self.id,
+                    first_name=first_name, last_name=last_name)
+            elif first_name:
+                graph_driver.execute_query(
+                    "MATCH (u:User {id: $id}) SET u.first_name = $first_name", id=self.id,
+                    first_name=first_name)
+            elif last_name:
+                graph_driver.execute_query(
+                    "MATCH (u:User {id: $id}) SET u.last_name = $last_name", id=self.id,
+                    last_name=last_name)
 
     def set_first_name(self, first_name):
         try:
@@ -119,6 +144,9 @@ class User:
         except Exception as e:
             print("Error while updating user. Error : ", e)
         else:
+            graph_driver.execute_query(
+                "MATCH (u:User {id: $id}) SET u.first_name = $first_name", id=self.id,
+                first_name=first_name)
             self.first_name = first_name
 
     def set_last_name(self, last_name):
@@ -127,6 +155,9 @@ class User:
         except Exception as e:
             print("Error while updating user. Error : ", e)
         else:
+            graph_driver.execute_query(
+                "MATCH (u:User {id: $id}) SET u.last_name = last_name", id=self.id,
+                last_name=last_name)
             self.last_name = last_name
 
     def set_email(self, email):
@@ -192,14 +223,12 @@ class User:
         for record in records:
             self.favorite_genres.append({'genre': record.data()['Genre']['name'], 'score': record['totalScore']})
 
-            
     def get_liked_movies_count(self):
         query = "MATCH (u:User {id: $id})-[r:LIKED {like: 1}]->() RETURN count(r) as result"
 
         records, summary, keys = graph_driver.execute_query(query, id=self.id)
 
         self.liked_movies_count = records[0].data()['result']
-
 
     def get_disliked_movies_count(self):
         query = "MATCH (u:User {id: $id})-[r:LIKED {like: 0}]->() RETURN count(r) as result"

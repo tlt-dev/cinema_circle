@@ -38,7 +38,8 @@
                     <li class="nav-item py-3" role="presentation">
                         <button class="nav-link text-start text-white py-3" style="width: 100%"
                                 id="pills-manage-users-tab" data-bs-toggle="pill" data-bs-target="#pills-manage-users"
-                                type="button" role="tab" aria-controls="pills-manage-users"><span class="ms-3">Manage users</span>
+                                type="button" role="tab" aria-controls="pills-manage-users" onclick="get_users_list()">
+                            <span class="ms-3">Manage users</span>
                         </button>
                     </li>
                 </ul>
@@ -299,7 +300,8 @@
                         </div>
                         <div class="row text-center justify-content-center">
                             <div class="col-3">
-                                <a href="#" id="link_next_page"><p class="text-secondary underline">Load More Movies</p></a>
+                                <a href="#" id="link_next_page"><p class="text-secondary underline">Load More Movies</p>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -307,7 +309,34 @@
 
                     <div class="tab-pane fade" id="pills-manage-users" role="tabpanel"
                          aria-labelledby="v-pills-manage-users-tab">
+                        <div class="row my-3">
+                            <div class="col-2">
+                                <button class="btn btn-outline-success" onclick="showModalUser()">Add user</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <table class="table text-white">
+                                    <thead>
+                                    <th>ID</th>
+                                    <th>First name</th>
+                                    <th>Last name</th>
+                                    <th>email</th>
+                                    <th></th>
+                                    <th></th>
+                                    </thead>
+                                    <tbody id="table_users">
 
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row text-center justify-content-center">
+                            <div class="col-3">
+                                <a href="#" id="link_next_user_page"><p class="text-secondary underline">Load More
+                                    Users</p></a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -324,7 +353,7 @@
                             aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" action="">
+                    <form method="POST" action="" id="form_movie">
                         {% csrf_token %}
                         <div class="row justify-content-center">
                             <input type="hidden" name="movie_id" value="">
@@ -333,7 +362,8 @@
                                        placeholder="Title" required>
                             </div>
                             <div class="col-5">
-                                <input type="date" name="release_date" class="form-control bg-dark" placeholder="date" required>
+                                <input type="date" name="release_date" class="form-control bg-dark" placeholder="date"
+                                       required>
                             </div>
                         </div>
                         <div class="row mt-3 justify-content-center">
@@ -359,6 +389,61 @@
                             <div class="col-3">
                                 <button type="submit" class="btn btn-success" id="btn_modal_movie"
                                         onclick="saveModalMovie()">Save
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal_user" tabindex="-1" aria-labelledby="modalUser"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg shadow">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Movie</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="resetModalUser()"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="" id="form_user">
+                        {% csrf_token %}
+                        <div class="row justify-content-center">
+                            <input type="hidden" name="user_id" value="">
+                            <div class="col-5">
+                                <input type="text" name="first_name" class="form-control bg-dark"
+                                       placeholder="First name" required>
+                            </div>
+                            <div class="col-5">
+                                <input type="text" name="last_name" class="form-control bg-dark"
+                                       placeholder="Last name" required>
+                            </div>
+                        </div>
+                        <div class="row mt-3 justify-content-center">
+                            <div class="col-5">
+                                <input type="text" name="email" class="form-control bg-dark"
+                                       placeholder="Email" required>
+                            </div>
+                            <div class="col-5">
+                                <input type="password" name="password" class="form-control bg-dark"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="row mb-3 justify-content-center">
+                            <div class="col-5">
+                                <label for="" class="text-black">User type</label>
+                                <select class="form-control bg-dark" name="admin" id="admin">
+                                    <option value="false">User</option>
+                                    <option value="true">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3 justify-content-center">
+                            <div class="col-3">
+                                <button type="submit" class="btn btn-success" id="btn_modal_user"
+                                        onclick="saveModalUser()">Save
                                 </button>
                             </div>
                         </div>

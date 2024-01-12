@@ -409,3 +409,56 @@ def delete_movie(request, id):
     movie.delete()
 
     return HttpResponse(json.dumps({'movie_id': movie.id}))
+
+
+def get_user_list(request, page):
+    users_list = list(user_collection.find(projection=('first_name', 'last_name', 'email')).sort({'_id': -1}))
+    paginator = Paginator(users_list, 10)
+
+    try:
+        users = paginator.page(page)
+    except EmptyPage:
+        users = paginator.page(paginator.num_pages)
+
+    return HttpResponse(json_util.dumps({'users': users.object_list, 'page': int(page)}))
+
+
+def get_user(request, id):
+    user = User(user=user_collection.find_one({'_id': ObjectId(id)}))
+
+    return HttpResponse(json_util.dumps(user.to_json()))
+
+
+def add_user(request):
+    user = User(
+        first_name=request.POST.get('first_name'),
+        last_name=request.POST.get('last_name'),
+        email=request.POST.get('email'),
+        password=request.POST.get('password'),
+        admin=True if request.POST.get('admin') == "true" else False
+    )
+
+    inserted_id = user.create()
+    return HttpResponse(json.dumps({'user_id': str(inserted_id)}))
+
+
+def edit_user(request, id):
+    user = User(user=user_collection.find_one({'_id': ObjectId(id)}))
+
+
+    user.update_multiple_fields(
+        first_name=request.POST.get('first_name'),
+        last_name=request.POST.get('last_name'),
+        email=request.POST.get('email'),
+        password=request.POST.get('password'),
+        admin=True if request.POST.get('admin') == "true" else False
+    )
+
+    return HttpResponse(json.dumps({'user_id': user.id}))
+
+
+def delete_user(request, id):
+    user = User(id=id)
+    user.delete()
+
+    return HttpResponse(json.dumps({'user_id': user.id}))

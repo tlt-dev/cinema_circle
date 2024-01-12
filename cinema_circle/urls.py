@@ -40,20 +40,33 @@ urlpatterns = [
 
     path('cinema_circle/admin/', views.admin_page, name='admin_page'),
 
-    path('cinema_circle/admin/users_activities_overview', views.users_activities_overview, name='users_activities_overview'),
-    path('cinema_circle/admin/users_activities_overview/<str:filter>', views.users_activities_overview, name='users_activities_overview'),
+    path('cinema_circle/admin/users_activities_overview', views.users_activities_overview,
+         name='users_activities_overview'),
+    path('cinema_circle/admin/users_activities_overview/<str:filter>', views.users_activities_overview,
+         name='users_activities_overview'),
     path('cinema_circle/admin/users_activities', views.users_activities, name='users_activities'),
     path('cinema_circle/admin/users_activities/<str:filter>', views.users_activities, name='users_activities'),
-    path('cinema_circle/admin/users_networking_activities', views.users_networking_activities, name='users_networking_activities'),
-    path('cinema_circle/admin/users_networking_activities/<str:filter>', views.users_networking_activities, name='users_networking_activities'),
+    path('cinema_circle/admin/users_networking_activities', views.users_networking_activities,
+         name='users_networking_activities'),
+    path('cinema_circle/admin/users_networking_activities/<str:filter>', views.users_networking_activities,
+         name='users_networking_activities'),
 
     path('cinema_circle/admin/movie_statistics', views.movies_statistics, name='movies_statistics'),
-    path('cinema_circle/admin/popular_genres/<str:filter>', views.get_admin_popular_genres, name='get_admin_popular_genres'),
-    path('cinema_circle/admin/detailled_statistics/<str:filter>', views.get_detailled_statistics, name='get_detailled_statistics'),
+    path('cinema_circle/admin/popular_genres/<str:filter>', views.get_admin_popular_genres,
+         name='get_admin_popular_genres'),
+    path('cinema_circle/admin/detailled_statistics/<str:filter>', views.get_detailled_statistics,
+         name='get_detailled_statistics'),
+
     path('cinema_circle/admin/movie_list/<int:page>', views.get_movie_list, name='get_movie_list'),
     path('cinema_circle/admin/movie/<str:id>', views.get_movie, name='get_movie'),
     path('cinema_circle/admin/add/movie', views.add_movie, name='add_movie'),
     path('cinema_circle/admin/movie/<str:id>/edit', views.edit_movie, name='edit_movie'),
     path('cinema_circle/admin/movie/<str:id>/delete', views.delete_movie, name='delete_movie'),
+
+    path('cinema_circle/admin/user_list/<int:page>', views.get_user_list, name='get_user_list'),
+    path('cinema_circle/admin/user/<str:id>', views.get_user, name='get_user'),
+    path('cinema_circle/admin/add/user', views.add_user, name='add_user'),
+    path('cinema_circle/admin/user/<str:id>/edit', views.edit_user, name='edit_user'),
+    path('cinema_circle/admin/user/<str:id>/delete', views.delete_user, name='delete_user'),
 
 ]

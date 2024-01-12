@@ -305,17 +305,17 @@ function get_movies_list(page = 1) {
         dataType: 'JSON'
     }).done(function (response) {
         next_page = page + 1
-        $("#link_next_page").attr('onclick', 'get_movies_list('+ next_page +')')
+        $("#link_next_page").attr('onclick', 'get_movies_list(' + next_page + ')')
 
         $.each(response.movies, function (index, value) {
             $("#table_movies").append(
-                '<tr id="row_'+ value._id.$oid +'">' +
+                '<tr id="row_' + value._id.$oid + '">' +
                 '<td>' + value._id.$oid + '</td>' +
-                '<td id="row_'+ value._id.$oid + '_title">' + value.title + '</td>' +
-                '<td id="row_'+ value._id.$oid + '_release_date">' + new Date(value.release_date.$date).toLocaleDateString('it-IT') + '</td>' +
-                '<td id="row_'+ value._id.$oid + '_runtime">' + value.runtime + '</td>' +
+                '<td id="row_' + value._id.$oid + '_title">' + value.title + '</td>' +
+                '<td id="row_' + value._id.$oid + '_release_date">' + new Date(value.release_date.$date).toLocaleDateString('it-IT') + '</td>' +
+                '<td id="row_' + value._id.$oid + '_runtime">' + value.runtime + '</td>' +
                 '<td><button class="btn btn-outline-primary" onclick="showModalMovie(\'' + value._id.$oid + '\')">Edit</button></td>' +
-                '<td><button class="btn btn-outline-danger" onclick="deleteMovie(\''+ value._id.$oid + '\')">Delete</button></td>' +
+                '<td><button class="btn btn-outline-danger" onclick="deleteMovie(\'' + value._id.$oid + '\')">Delete</button></td>' +
                 '</tr>'
             )
         })
@@ -324,14 +324,14 @@ function get_movies_list(page = 1) {
 
 }
 
-function deleteMovie(movie_id){
+function deleteMovie(movie_id) {
 
     $.ajax({
         url: '/cinema_circle/admin/movie/' + movie_id + '/delete',
         type: 'POST',
         dataType: 'JSON',
         headers: {'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()},
-    }).done(function(response){
+    }).done(function (response) {
         $('#row_' + response.movie_id).remove()
     })
 
@@ -362,9 +362,9 @@ function showModalMovie(id = null) {
         var day = ("0" + date.getDate()).slice(-2);
         var month = ("0" + (date.getMonth() + 1)).slice(-2);
         release_date = date.getFullYear() + "-" + month + "-" + day
-        if(release_date != "Invalid Date"){
+        if (release_date != "Invalid Date") {
             $('input[name="release_date"]').val(release_date)
-        }else{
+        } else {
             $('input[name="release_date"]').val('-')
         }
 
@@ -378,14 +378,12 @@ function showModalMovie(id = null) {
 
 }
 
-window.addEventListener('DOMContentLoaded',function () {
-    $('#form_movie').on('submit', function(e){
-    e.preventDefault();
-    return false
-})
+window.addEventListener('DOMContentLoaded', function () {
+    $('#form_movie').on('submit', function (e) {
+        e.preventDefault();
+        return false
+    })
 });
-
-
 
 
 function saveModalMovie() {
@@ -398,11 +396,11 @@ function saveModalMovie() {
     runtime = $("input[name='runtime").val()
     overview = $("textarea[name='overview']").val()
 
-    if(title == '' || release_date == '' || runtime == '' || overview == '') {
+    if (title == '' || release_date == '' || runtime == '' || overview == '') {
         return false
     }
 
-    if(id == "") {
+    if (id == "") {
         $.ajax({
             url: '/cinema_circle/admin/add/movie',
             type: 'POST',
@@ -415,15 +413,15 @@ function saveModalMovie() {
                 "runtime": $("input[name='runtime']").val(),
                 "overview": $("textarea[name='overview']").val()
             }
-        }).done(function(response){
-            $("#table_movies").append(
-                '<tr id="row_'+ response.movie_id +'">' +
+        }).done(function (response) {
+            $("#table_movies").prepend(
+                '<tr id="row_' + response.movie_id + '">' +
                 '<td >' + response.movie_id + '</td>' +
-                '<td id="row_'+ value._id.$oid + '_title">' + title + '</td>' +
-                '<td id="row_'+ value._id.$oid + '_release_date">' + release_date + '</td>' +
-                '<td id="row_'+ value._id.$oid + '_runtime">' + runtime + '</td>' +
+                '<td id="row_' + response.movie_id + '_title">' + title + '</td>' +
+                '<td id="row_' + response.movie_id + '_release_date">' + release_date + '</td>' +
+                '<td id="row_' + response.movie_id + '_runtime">' + runtime + '</td>' +
                 '<td><button class="btn btn-outline-primary" onclick="showModalMovie(\'' + response.movie_id + '\')">Edit</button></td>' +
-                '<td><button class="btn btn-outline-danger" onclick="deleteMovie(\''+ response.movie_id + '\')">Delete</button></td>' +
+                '<td><button class="btn btn-outline-danger" onclick="deleteMovie(\'' + response.movie_id + '\')">Delete</button></td>' +
                 '</tr>'
             )
         })
@@ -440,7 +438,7 @@ function saveModalMovie() {
                 "runtime": $("input[name='runtime']").val(),
                 "overview": $("textarea[name='overview']").val()
             }
-        }).done(function(response){
+        }).done(function (response) {
             $("#row_" + response.movie_id + "_title").text(title)
             $("#row_" + response.movie_id + "_release_date").text(release_date)
             $("#row_" + response.movie_id + "_runtime").text(runtime)
@@ -464,6 +462,153 @@ function resetModalMovie() {
 }
 
 
+function get_users_list(page = 1) {
+
+    $.ajax({
+        url: '/cinema_circle/admin/user_list/' + page,
+        type: 'GET',
+        dataType: 'JSON'
+    }).done(function (response) {
+        next_page = page + 1
+        $("#link_next_user_page").attr('onclick', 'get_users_list(' + next_page + ')')
+
+        $.each(response.users, function (index, value) {
+            $("#table_users").append(
+                '<tr id="row_' + value._id.$oid + '">' +
+                '<td>' + value._id.$oid + '</td>' +
+                '<td id="row_' + value._id.$oid + '_first_name">' + value.first_name + '</td>' +
+                '<td id="row_' + value._id.$oid + '_last_name">' + value.last_name + '</td>' +
+                '<td id="row_' + value._id.$oid + '_email">' + value.email + '</td>' +
+                '<td><button class="btn btn-outline-primary" onclick="showModalUser(\'' + value._id.$oid + '\')">Edit</button></td>' +
+                '<td><button class="btn btn-outline-danger" onclick="deleteUser(\'' + value._id.$oid + '\')">Delete</button></td>' +
+                '</tr>'
+            )
+        })
+
+    })
+
+}
+
+function deleteUser(user_id) {
+
+    $.ajax({
+        url: '/cinema_circle/admin/user/' + user_id + '/delete',
+        type: 'POST',
+        dataType: 'JSON',
+        headers: {'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()},
+    }).done(function (response) {
+        $('#row_' + response.user_id).remove()
+    })
+
+}
+
+function showModalUser(id = null) {
+
+    var modal_user = new bootstrap.Modal(document.getElementById('modal_user'))
+
+    $.ajax({
+        url: '/cinema_circle/admin/user/' + id,
+        type: 'GET',
+        dataType: 'JSON'
+    }).done(function (response) {
+        console.log(response.admin)
+        $('input[name="user_id"]').val(response.id)
+        $('input[name="first_name"]').val(response.first_name)
+        $('input[name="last_name"]').val(response.last_name)
+        $('input[name="email"]').val(response.email)
+        $('input[name="password"]').val(response.password)
+        if(response.admin == true) {
+            $("#admin").val("true")
+        } else {
+            $("#admin").val("false")
+        }
+
+    })
+
+    modal_user.show()
+
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+    $('#form_user').on('submit', function (e) {
+        e.preventDefault();
+        return false
+    })
+});
+
+
+function saveModalUser() {
+
+    id = $("input[name='user_id']").val()
+
+    first_name = $("input[name='first_name").val()
+    last_name = $("input[name='last_name").val()
+    email = $("input[name='email").val()
+    password = $("input[name='password").val()
+
+    if (first_name == '' || last_name == '' || password == '' || email == '') {
+        return false
+    }
+
+    if (id == "") {
+        $.ajax({
+            url: '/cinema_circle/admin/add/user',
+            type: 'POST',
+            dataType: 'JSON',
+            headers: {'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()},
+            data: {
+                "first_name": $("input[name='first_name").val(),
+                "last_name": $("input[name='last_name']").val(),
+                "email": $("input[name='email']").val(),
+                "password": $("input[name='password']").val(),
+                "admin": $('#admin').val()
+            }
+        }).done(function (response) {
+            console.log(response.user_id)
+            $("#table_users").prepend(
+                '<tr id="row_' + response.user_id + '">' +
+                '<td>' + response.user_id + '</td>' +
+                '<td id="row_' + response.user_id + '_first_name">' + first_name + '</td>' +
+                '<td id="row_' + response.user_id + '_last_name">' + last_name + '</td>' +
+                '<td id="row_' + response.user_id + '_email">' + email + '</td>' +
+                '<td><button class="btn btn-outline-primary" onclick="showModalUser(\'' + response.user_id + '\')">Edit</button></td>' +
+                '<td><button class="btn btn-outline-danger" onclick="deleteUser(\'' + response.user_id + '\')">Delete</button></td>' +
+                '</tr>'
+            )
+        })
+    } else {
+        $.ajax({
+            url: '/cinema_circle/admin/user/' + id + '/edit',
+            type: 'POST',
+            dataType: 'JSON',
+            headers: {'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()},
+            data: {
+                "first_name": $("input[name='first_name").val(),
+                "last_name": $("input[name='last_name']").val(),
+                "email": $("input[name='email']").val(),
+                "password": $("input[name='password']").val(),
+                "admin": $('#admin').val()
+            }
+        }).done(function (response) {
+            $("#row_" + response.user_id + "_first_name").text(first_name)
+            $("#row_" + response.user_id + "_last_name").text(last_name)
+            $("#row_" + response.user_id + "_email").text(email)
+        })
+    }
+
+    resetModalUser()
+    $('#modal_user').modal('hide');
+
+}
+
+function resetModalUser() {
+
+    $('input[name="user_id"]').val('')
+    $('input[name="first_name"]').val('')
+    $('input[name="last_name"]').val('')
+    $('input[name="email"]').val('')
+
+}
 
 
 
